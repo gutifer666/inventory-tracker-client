@@ -8,22 +8,22 @@ import { AppFooter } from './app.footer';
 import { LayoutService } from '../service/layout.service';
 
 @Component({
-    selector: 'app-layout',
+    selector: 'app-employee-layout',
     standalone: true,
     imports: [CommonModule, AppTopbar, AppSidebar, RouterModule, AppFooter],
     template: `<div class="layout-wrapper" [ngClass]="containerClass">
-        <app-topbar></app-topbar>
-        <app-sidebar></app-sidebar>
+        <app-employee-topbar></app-employee-topbar>
+        <app-employee-sidebar></app-employee-sidebar>
         <div class="layout-main-container">
             <div class="layout-main">
                 <router-outlet></router-outlet>
             </div>
-            <app-footer></app-footer>
+            <app-employee-footer></app-employee-footer>
         </div>
         <div class="layout-mask animate-fadein"></div>
     </div> `
 })
-export class AppLayout {
+export class AppEmployeeLayout {
     overlayMenuOpenSubscription: Subscription;
 
     menuOutsideClickListener: any;
