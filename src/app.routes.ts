@@ -6,6 +6,7 @@ import { Login } from './app/share/pages/auth/login';
 import { EmployeeDashboard } from './app/employee/pages/dashboard/employee-dashboard';
 import { Documentation } from './app/share/pages/documentation/documentation';
 import { Landing } from './app/share/pages/landing/landing';
+import { ProductCrud } from './app/share/pages/product_crud/product-crud';
 
 export const appRoutes: Routes = [
     { path: '', component: Login },
@@ -15,6 +16,7 @@ export const appRoutes: Routes = [
         component: AppAdminLayout,
         children: [
             { path: '', component: AdminDashboard },
+            { path: 'product', component: ProductCrud },
             { path: 'documentation', component: Documentation }
         ]
     },

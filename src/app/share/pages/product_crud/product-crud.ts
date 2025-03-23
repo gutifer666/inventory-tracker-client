@@ -18,7 +18,7 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Product, ProductService } from '../service/product.service';
+import { Product, ProductService } from '../../services/product/product.service';
 
 interface Column {
     field: string;
@@ -32,7 +32,7 @@ interface ExportColumn {
 }
 
 @Component({
-    selector: 'app-crud',
+    selector: 'app-product-crud',
     standalone: true,
     imports: [
         CommonModule,
@@ -77,16 +77,16 @@ interface ExportColumn {
             [(selection)]="selectedProducts"
             [rowHover]="true"
             dataKey="id"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} productos"
             [showCurrentPageReport]="true"
             [rowsPerPageOptions]="[10, 20, 30]"
         >
             <ng-template #caption>
                 <div class="flex items-center justify-between">
-                    <h5 class="m-0">Manage Products</h5>
+                    <h5 class="m-0">Administrar Productos</h5>
                     <p-iconfield>
                         <p-inputicon styleClass="pi pi-search" />
-                        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+                        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
                     </p-iconfield>
                 </div>
             </ng-template>
@@ -97,24 +97,19 @@ interface ExportColumn {
                     </th>
                     <th style="min-width: 16rem">Code</th>
                     <th pSortableColumn="name" style="min-width:16rem">
-                        Name
+                        Nombre
                         <p-sortIcon field="name" />
                     </th>
-                    <th>Image</th>
                     <th pSortableColumn="price" style="min-width: 8rem">
-                        Price
+                        Precio
                         <p-sortIcon field="price" />
                     </th>
                     <th pSortableColumn="category" style="min-width:10rem">
-                        Category
+                        Categoría
                         <p-sortIcon field="category" />
                     </th>
-                    <th pSortableColumn="rating" style="min-width: 12rem">
-                        Reviews
-                        <p-sortIcon field="rating" />
-                    </th>
                     <th pSortableColumn="inventoryStatus" style="min-width: 12rem">
-                        Status
+                        Cantidad
                         <p-sortIcon field="inventoryStatus" />
                     </th>
                     <th style="min-width: 12rem"></th>
@@ -127,17 +122,9 @@ interface ExportColumn {
                     </td>
                     <td style="min-width: 12rem">{{ product.code }}</td>
                     <td style="min-width: 16rem">{{ product.name }}</td>
-                    <td>
-                        <img [src]="'https://primefaces.org/cdn/primeng/images/demo/product/' + product.image" [alt]="product.name" style="width: 64px" class="rounded" />
-                    </td>
-                    <td>{{ product.price | currency: 'USD' }}</td>
-                    <td>{{ product.category }}</td>
-                    <td>
-                        <p-rating [(ngModel)]="product.rating" [readonly]="true" />
-                    </td>
-                    <td>
-                        <p-tag [value]="product.inventoryStatus" [severity]="getSeverity(product.inventoryStatus)" />
-                    </td>
+                    <td>{{ product.retail_price | currency: 'EUR' }}</td>
+                    <td>{{ product.category_id }}</td>
+                    <td>{{ product.quantity}}</td>
                     <td>
                         <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(product)" />
                         <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(product)" />
@@ -149,7 +136,6 @@ interface ExportColumn {
         <p-dialog [(visible)]="productDialog" [style]="{ width: '450px' }" header="Product Details" [modal]="true">
             <ng-template #content>
                 <div class="flex flex-col gap-6">
-                    <img [src]="'https://primefaces.org/cdn/primeng/images/demo/product/' + product.image" [alt]="product.image" class="block m-auto pb-4" *ngIf="product.image" />
                     <div>
                         <label for="name" class="block font-bold mb-3">Name</label>
                         <input type="text" pInputText id="name" [(ngModel)]="product.name" required autofocus fluid />
@@ -162,26 +148,26 @@ interface ExportColumn {
 
                     <div>
                         <label for="inventoryStatus" class="block font-bold mb-3">Inventory Status</label>
-                        <p-select [(ngModel)]="product.inventoryStatus" inputId="inventoryStatus" [options]="statuses" optionLabel="label" optionValue="label" placeholder="Select a Status" fluid />
+                        <p-select [(ngModel)]="product.quantity" inputId="inventoryStatus" [options]="statuses" optionLabel="label" optionValue="label" placeholder="Select a Status" fluid />
                     </div>
 
                     <div>
                         <span class="block font-bold mb-4">Category</span>
                         <div class="grid grid-cols-12 gap-4">
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category1" name="category" value="Accessories" [(ngModel)]="product.category" />
+                                <p-radiobutton id="category1" name="category" value="Accessories" [(ngModel)]="product.category_id" />
                                 <label for="category1">Accessories</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category2" name="category" value="Clothing" [(ngModel)]="product.category" />
+                                <p-radiobutton id="category2" name="category" value="Clothing" [(ngModel)]="product.category_id" />
                                 <label for="category2">Clothing</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category3" name="category" value="Electronics" [(ngModel)]="product.category" />
+                                <p-radiobutton id="category3" name="category" value="Electronics" [(ngModel)]="product.category_id" />
                                 <label for="category3">Electronics</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category4" name="category" value="Fitness" [(ngModel)]="product.category" />
+                                <p-radiobutton id="category4" name="category" value="Fitness" [(ngModel)]="product.category_id" />
                                 <label for="category4">Fitness</label>
                             </div>
                         </div>
@@ -190,7 +176,7 @@ interface ExportColumn {
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-6">
                             <label for="price" class="block font-bold mb-3">Price</label>
-                            <p-inputnumber id="price" [(ngModel)]="product.price" mode="currency" currency="USD" locale="en-US" fluid />
+                            <p-inputnumber id="price" [(ngModel)]="product.retail_price" mode="currency" currency="USD" locale="en-US" fluid />
                         </div>
                         <div class="col-span-6">
                             <label for="quantity" class="block font-bold mb-3">Quantity</label>
@@ -210,7 +196,7 @@ interface ExportColumn {
     `,
     providers: [MessageService, ProductService, ConfirmationService]
 })
-export class Crud implements OnInit {
+export class ProductCrud implements OnInit {
     productDialog: boolean = false;
 
     products = signal<Product[]>([]);
@@ -244,7 +230,7 @@ export class Crud implements OnInit {
     }
 
     loadDemoData() {
-        this.productService.getProducts().then((data) => {
+        this.productService.getProducts().subscribe((data) => {
             this.products.set(data);
         });
 
@@ -270,7 +256,17 @@ export class Crud implements OnInit {
     }
 
     openNew() {
-        this.product = {};
+        this.product = {
+            id: 0,
+            code: "",
+            cost_price: 0,
+            description: "",
+            name: "",
+            quantity: 0,
+            retail_price: 0,
+            category_id: 0,
+            supplier_id: 0
+        };
         this.submitted = false;
         this.productDialog = true;
     }
@@ -286,7 +282,10 @@ export class Crud implements OnInit {
             header: 'Confirm',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.products.set(this.products().filter((val) => !this.selectedProducts?.includes(val)));
+                this.selectedProducts?.forEach(prod => {
+                    this.productService.deleteProduct(prod.id).subscribe();
+                });
+                this.loadDemoData();
                 this.selectedProducts = null;
                 this.messageService.add({
                     severity: 'success',
@@ -309,37 +308,30 @@ export class Crud implements OnInit {
             header: 'Confirm',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.products.set(this.products().filter((val) => val.id !== product.id));
-                this.product = {};
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Deleted',
-                    life: 3000
+                this.productService.deleteProduct(product.id).subscribe((success) => {
+                    if (success) {
+                        this.loadDemoData();
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Successful',
+                            detail: 'Product Deleted',
+                            life: 3000
+                        });
+                    }
                 });
+                this.product = {
+                    id: 0,
+                    code: "",
+                    cost_price: 0,
+                    description: "",
+                    name: "",
+                    quantity: 0,
+                    retail_price: 0,
+                    category_id: 0,
+                    supplier_id: 0
+                };
             }
         });
-    }
-
-    findIndexById(id: string): number {
-        let index = -1;
-        for (let i = 0; i < this.products().length; i++) {
-            if (this.products()[i].id === id) {
-                index = i;
-                break;
-            }
-        }
-
-        return index;
-    }
-
-    createId(): string {
-        let id = '';
-        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (var i = 0; i < 5; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return id;
     }
 
     getSeverity(status: string) {
@@ -360,28 +352,38 @@ export class Crud implements OnInit {
         let _products = this.products();
         if (this.product.name?.trim()) {
             if (this.product.id) {
-                _products[this.findIndexById(this.product.id)] = this.product;
-                this.products.set([..._products]);
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Updated',
-                    life: 3000
+                this.productService.updateProduct(this.product).subscribe((updatedProduct) => {
+                    this.loadDemoData();
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Successful',
+                        detail: 'Product Updated',
+                        life: 3000
+                    });
                 });
             } else {
-                this.product.id = this.createId();
-                this.product.image = 'product-placeholder.svg';
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Created',
-                    life: 3000
+                this.productService.addProduct(this.product).subscribe((newProduct) => {
+                    this.loadDemoData();
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Successful',
+                        detail: 'Product Created',
+                        life: 3000
+                    });
                 });
-                this.products.set([..._products, this.product]);
             }
-
             this.productDialog = false;
-            this.product = {};
+            this.product = {
+                id: 0,
+                code: "",
+                cost_price: 0,
+                description: "",
+                name: "",
+                quantity: 0,
+                retail_price: 0,
+                category_id: 0,
+                supplier_id: 0
+            };
         }
     }
 }

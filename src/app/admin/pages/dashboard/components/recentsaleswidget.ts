@@ -11,21 +11,27 @@ import { Transaction, TransactionService } from '../../../../share/services/tran
     imports: [CommonModule, TableModule, ButtonModule, RippleModule],
     template: `<div class="card !mb-8 text-center">
         <div class="font-semibold text-xl mb-4">Ventas Recientes</div>
-        <p-table [value]="transactions" [paginator]="true" [rows]="5" responsiveLayout="scroll">
+        <p-table [value]="transactions" [paginator]="true" [rows]="3" responsiveLayout="scroll">
             <ng-template pTemplate="header">
                 <tr>
+                    <th class="text-center">Empleado</th>
+                    <th class="text-center">Cliente</th>
                     <th class="text-center">Código</th>
                     <th class="text-center">Nombre</th>
                     <th class="text-center">Precio</th>
                     <th class="text-center">Cantidad</th>
+                    <th class="text-center">Fecha</th>
                 </tr>
             </ng-template>
             <ng-template pTemplate="body" let-transaction>
                 <tr>
+                    <td class="text-center">{{ transaction.employee_name }}</td>
+                    <td class="text-center">{{ transaction.client_name }}</td>
                     <td class="text-center">{{ transaction.product_code }}</td>
                     <td class="text-center">{{ transaction.product_name }}</td>
-                    <td class="text-center">{{ transaction.transaction_price | currency: 'USD' }}</td>
+                    <td class="text-center">{{ transaction.transaction_price | currency: 'EUR' }}</td>
                     <td class="text-center">{{ transaction.quantity }}</td>
+                    <td class="text-center">{{ transaction.created_at | date: 'dd/MM/yyyy HH:mm' }}</td>
                 </tr>
             </ng-template>
         </p-table>
@@ -39,7 +45,7 @@ export class RecentSalesWidget implements OnInit {
 
     ngOnInit() {
         this.transactionService.getTransactions().subscribe(transactions => {
-            this.transactions = transactions;
+            this.transactions = transactions.reverse();
         });
     }
 }
