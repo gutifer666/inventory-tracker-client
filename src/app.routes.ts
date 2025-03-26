@@ -6,7 +6,8 @@ import { Login } from './app/share/pages/auth/login';
 import { EmployeeDashboard } from './app/employee/pages/dashboard/employee-dashboard';
 import { Documentation } from './app/share/pages/documentation/documentation';
 import { Landing } from './app/share/pages/landing/landing';
-import { ProductCrud } from './app/share/pages/product_crud/product-crud';
+import { ProductCrud } from './app/share/pages/product/product-crud';
+import { Notfound } from './app/share/pages/notfound/notfound';
 
 export const appRoutes: Routes = [
     { path: '', component: Login },
@@ -30,5 +31,6 @@ export const appRoutes: Routes = [
     },
 
     { path: 'landing', component: Landing },
+    { path: 'notfound', component: Notfound },
     { path: '**', redirectTo: '/notfound' }
 ];

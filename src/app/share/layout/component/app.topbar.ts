@@ -7,7 +7,7 @@ import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '../service/layout.service';
 
 @Component({
-    selector: 'app-admin-topbar',
+    selector: 'app-topbar',
     standalone: true,
     imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator],
     template: ` <div class="layout-topbar">
@@ -15,8 +15,7 @@ import { LayoutService } from '../service/layout.service';
             <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
                 <i class="pi pi-bars"></i>
             </button>
-            <a class="layout-topbar-logo" routerLink="/admin">
-
+            <a class="layout-topbar-logo" routerLink="/">
                 <svg viewBox="0 0 54 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M5 10L27 2L49 10V30L27 38L5 30V10Z"
@@ -59,7 +58,7 @@ import { LayoutService } from '../service/layout.service';
                     >
                         <i class="pi pi-palette"></i>
                     </button>
-                    <app-admin-configurator />
+                    <app-configurator />
                 </div>
             </div>
 

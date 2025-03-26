@@ -62,7 +62,7 @@ interface ExportColumn {
             </ng-template>
 
             <ng-template #end>
-                <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+                <p-button label="CSV" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
             </ng-template>
         </p-toolbar>
 
@@ -72,7 +72,7 @@ interface ExportColumn {
             [rows]="10"
             [columns]="cols"
             [paginator]="true"
-            [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
+            [globalFilterFields]="['name']"
             [tableStyle]="{ 'min-width': '75rem' }"
             [(selection)]="selectedProducts"
             [rowHover]="true"
@@ -133,26 +133,26 @@ interface ExportColumn {
             </ng-template>
         </p-table>
 
-        <p-dialog [(visible)]="productDialog" [style]="{ width: '450px' }" header="Product Details" [modal]="true">
+        <p-dialog [(visible)]="productDialog" [style]="{ width: '450px' }" header="Detalles del Producto" [modal]="true">
             <ng-template #content>
                 <div class="flex flex-col gap-6">
                     <div>
-                        <label for="name" class="block font-bold mb-3">Name</label>
+                        <label for="name" class="block font-bold mb-3">Nombre</label>
                         <input type="text" pInputText id="name" [(ngModel)]="product.name" required autofocus fluid />
-                        <small class="text-red-500" *ngIf="submitted && !product.name">Name is required.</small>
+                        <small class="text-red-500" *ngIf="submitted && !product.name">Nombre requerido.</small>
                     </div>
                     <div>
-                        <label for="description" class="block font-bold mb-3">Description</label>
+                        <label for="description" class="block font-bold mb-3">Descripción</label>
                         <textarea id="description" pTextarea [(ngModel)]="product.description" required rows="3" cols="20" fluid></textarea>
                     </div>
 
                     <div>
-                        <label for="inventoryStatus" class="block font-bold mb-3">Inventory Status</label>
+                        <label for="inventoryStatus" class="block font-bold mb-3">Código</label>
                         <p-select [(ngModel)]="product.quantity" inputId="inventoryStatus" [options]="statuses" optionLabel="label" optionValue="label" placeholder="Select a Status" fluid />
                     </div>
 
                     <div>
-                        <span class="block font-bold mb-4">Category</span>
+                        <span class="block font-bold mb-4">Categoría</span>
                         <div class="grid grid-cols-12 gap-4">
                             <div class="flex items-center gap-2 col-span-6">
                                 <p-radiobutton id="category1" name="category" value="Accessories" [(ngModel)]="product.category_id" />
@@ -175,11 +175,11 @@ interface ExportColumn {
 
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-6">
-                            <label for="price" class="block font-bold mb-3">Price</label>
-                            <p-inputnumber id="price" [(ngModel)]="product.retail_price" mode="currency" currency="USD" locale="en-US" fluid />
+                            <label for="price" class="block font-bold mb-3">Precio</label>
+                            <p-inputnumber id="price" [(ngModel)]="product.retail_price" mode="currency" currency="EUR" locale="en-US" fluid />
                         </div>
                         <div class="col-span-6">
-                            <label for="quantity" class="block font-bold mb-3">Quantity</label>
+                            <label for="quantity" class="block font-bold mb-3">Cantidad</label>
                             <p-inputnumber id="quantity" [(ngModel)]="product.quantity" fluid />
                         </div>
                     </div>
@@ -187,8 +187,8 @@ interface ExportColumn {
             </ng-template>
 
             <ng-template #footer>
-                <p-button label="Cancel" icon="pi pi-times" text (click)="hideDialog()" />
-                <p-button label="Save" icon="pi pi-check" (click)="saveProduct()" />
+                <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
+                <p-button label="Añadir" icon="pi pi-check" (click)="saveProduct()" />
             </ng-template>
         </p-dialog>
 

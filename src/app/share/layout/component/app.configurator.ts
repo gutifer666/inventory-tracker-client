@@ -37,7 +37,7 @@ declare type SurfacesType = {
 };
 
 @Component({
-    selector: 'app-employee-configurator',
+    selector: 'app-configurator',
     standalone: true,
     imports: [CommonModule, FormsModule, SelectButtonModule],
     template: `
