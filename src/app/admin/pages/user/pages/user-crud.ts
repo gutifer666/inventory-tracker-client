@@ -18,7 +18,7 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Product, ProductService } from '../../services/product/product.service';
+import { User, UserService } from '../services/user.service';
 
 interface Column {
     field: string;
@@ -32,7 +32,7 @@ interface ExportColumn {
 }
 
 @Component({
-    selector: 'app-product-crud',
+    selector: 'app-user-crud',
     standalone: true,
     imports: [
         CommonModule,
@@ -58,7 +58,9 @@ interface ExportColumn {
         <p-toolbar styleClass="mb-6">
             <ng-template #start>
                 <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-                <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+                <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined
+                          (onClick)="deleteSelectedUsers()"
+                          [disabled]="!selectedUsers || !selectedUsers.length" />
             </ng-template>
 
             <ng-template #end>
@@ -68,22 +70,22 @@ interface ExportColumn {
 
         <p-table
             #dt
-            [value]="products()"
+            [value]="users()"
             [rows]="10"
             [columns]="cols"
             [paginator]="true"
-            [globalFilterFields]="['name']"
+            [globalFilterFields]="['username']"
             [tableStyle]="{ 'min-width': '75rem' }"
-            [(selection)]="selectedProducts"
+            [(selection)]="selectedUsers"
             [rowHover]="true"
             dataKey="id"
-            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} productos"
+            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} usuarios"
             [showCurrentPageReport]="true"
             [rowsPerPageOptions]="[10, 20, 30]"
         >
             <ng-template #caption>
                 <div class="flex items-center justify-between">
-                    <h5 class="m-0">Administrar Productos</h5>
+                    <h5 class="m-0">Administrar Usuarios</h5>
                     <p-iconfield>
                         <p-inputicon styleClass="pi pi-search" />
                         <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
@@ -95,115 +97,119 @@ interface ExportColumn {
                     <th style="width: 3rem">
                         <p-tableHeaderCheckbox />
                     </th>
-                    <th style="min-width: 16rem">Code</th>
+                    <th style="min-width: 16rem">Nombre del Usuario</th>
                     <th pSortableColumn="name" style="min-width:16rem">
-                        Nombre
+                        Contraseña
                         <p-sortIcon field="name" />
                     </th>
                     <th pSortableColumn="price" style="min-width: 8rem">
-                        Precio
+                        Rol
                         <p-sortIcon field="price" />
                     </th>
                     <th pSortableColumn="category" style="min-width:10rem">
-                        Categoría
+                        Nombre Completo
                         <p-sortIcon field="category" />
-                    </th>
-                    <th pSortableColumn="inventoryStatus" style="min-width: 12rem">
-                        Cantidad
-                        <p-sortIcon field="inventoryStatus" />
                     </th>
                     <th style="min-width: 12rem"></th>
                 </tr>
             </ng-template>
-            <ng-template #body let-product>
+            <ng-template #body let-user>
                 <tr>
                     <td style="width: 3rem">
-                        <p-tableCheckbox [value]="product" />
+                        <p-tableCheckbox [value]="user" />
                     </td>
-                    <td style="min-width: 12rem">{{ product.code }}</td>
-                    <td style="min-width: 16rem">{{ product.name }}</td>
-                    <td>{{ product.retail_price | currency: 'EUR' }}</td>
-                    <td>{{ product.category_id }}</td>
-                    <td>{{ product.quantity}}</td>
+                    <td style="min-width: 12rem">{{ user.username }}</td>
+                    <td style="min-width: 16rem">{{ user.password }}</td>
+                    <td>{{ user.roles }}</td>
+                    <td>{{ user.fullName }}</td>
                     <td>
-                        <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(product)" />
-                        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(product)" />
+                        <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true"
+                                  (click)="editUser(user)" />
+                        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
+                                  (click)="deleteUser(user)" />
                     </td>
                 </tr>
             </ng-template>
         </p-table>
 
-        <p-dialog [(visible)]="productDialog" [style]="{ width: '450px' }" header="Detalles del Producto" [modal]="true">
+        <p-dialog [(visible)]="userDialog" [style]="{ width: '450px' }" header="Detalles del Producto" [modal]="true">
             <ng-template #content>
                 <div class="flex flex-col gap-6">
                     <div>
-                        <label for="name" class="block font-bold mb-3">Nombre</label>
-                        <input type="text" pInputText id="name" [(ngModel)]="product.name" required autofocus fluid />
-                        <small class="text-red-500" *ngIf="submitted && !product.name">Nombre requerido.</small>
+                        <label for="name" class="block font-bold mb-3">Nombre de Usuario</label>
+                        <input type="text" pInputText id="name" [(ngModel)]="user.username" required autofocus fluid />
+                        <small class="text-red-500" *ngIf="submitted && !user.username">Nombre requerido.</small>
                     </div>
-                    <div>
+                    <!--<div>
                         <label for="description" class="block font-bold mb-3">Descripción</label>
-                        <textarea id="description" pTextarea [(ngModel)]="product.description" required rows="3" cols="20" fluid></textarea>
+                        <textarea id="description" pTextarea [(ngModel)]="user.description" required rows="3"
+                                  cols="20" fluid></textarea>
                     </div>
 
                     <div>
                         <label for="inventoryStatus" class="block font-bold mb-3">Código</label>
-                        <p-select [(ngModel)]="product.quantity" inputId="inventoryStatus" [options]="statuses" optionLabel="label" optionValue="label" placeholder="Select a Status" fluid />
+                        <p-select [(ngModel)]="user.quantity" inputId="inventoryStatus" [options]="statuses"
+                                  optionLabel="label" optionValue="label" placeholder="Select a Status" fluid />
                     </div>
 
                     <div>
                         <span class="block font-bold mb-4">Categoría</span>
                         <div class="grid grid-cols-12 gap-4">
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category1" name="category" value="Accessories" [(ngModel)]="product.category_id" />
+                                <p-radiobutton id="category1" name="category" value="Accessories"
+                                               [(ngModel)]="user.category_id" />
                                 <label for="category1">Accessories</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category2" name="category" value="Clothing" [(ngModel)]="product.category_id" />
+                                <p-radiobutton id="category2" name="category" value="Clothing"
+                                               [(ngModel)]="user.category_id" />
                                 <label for="category2">Clothing</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category3" name="category" value="Electronics" [(ngModel)]="product.category_id" />
+                                <p-radiobutton id="category3" name="category" value="Electronics"
+                                               [(ngModel)]="user.category_id" />
                                 <label for="category3">Electronics</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category4" name="category" value="Fitness" [(ngModel)]="product.category_id" />
+                                <p-radiobutton id="category4" name="category" value="Fitness"
+                                               [(ngModel)]="user.category_id" />
                                 <label for="category4">Fitness</label>
                             </div>
                         </div>
-                    </div>
+                    </div>-->
 
-                    <div class="grid grid-cols-12 gap-4">
+<!--                    <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-6">
                             <label for="price" class="block font-bold mb-3">Precio</label>
-                            <p-inputnumber id="price" [(ngModel)]="product.retail_price" mode="currency" currency="EUR" locale="en-US" fluid />
+                            <p-inputnumber id="price" [(ngModel)]="user.retail_price" mode="currency" currency="EUR"
+                                           locale="en-US" fluid />
                         </div>
                         <div class="col-span-6">
                             <label for="quantity" class="block font-bold mb-3">Cantidad</label>
-                            <p-inputnumber id="quantity" [(ngModel)]="product.quantity" fluid />
+                            <p-inputnumber id="quantity" [(ngModel)]="user.quantity" fluid />
                         </div>
-                    </div>
+                    </div>-->
                 </div>
             </ng-template>
 
             <ng-template #footer>
                 <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
-                <p-button label="Añadir" icon="pi pi-check" (click)="saveProduct()" />
+                <p-button label="Añadir" icon="pi pi-check" (click)="saveUser()" />
             </ng-template>
         </p-dialog>
 
         <p-confirmdialog [style]="{ width: '450px' }" />
     `,
-    providers: [MessageService, ProductService, ConfirmationService]
+    providers: [MessageService, UserService, ConfirmationService]
 })
-export class ProductCrud implements OnInit {
-    productDialog: boolean = false;
+export class UserCrud implements OnInit {
+    userDialog: boolean = false;
 
-    products = signal<Product[]>([]);
+    users = signal<User[]>([]);
 
-    product!: Product;
+    user!: User;
 
-    selectedProducts!: Product[] | null;
+    selectedUsers!: User[] | null;
 
     submitted: boolean = false;
 
@@ -216,7 +222,7 @@ export class ProductCrud implements OnInit {
     cols!: Column[];
 
     constructor(
-        private productService: ProductService,
+        private userService: UserService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService
     ) {}
@@ -230,8 +236,8 @@ export class ProductCrud implements OnInit {
     }
 
     loadDemoData() {
-        this.productService.getProducts().subscribe((data) => {
-            this.products.set(data);
+        this.userService.getUsers().subscribe((data) => {
+            this.users.set(data);
         });
 
         this.statuses = [
@@ -241,11 +247,10 @@ export class ProductCrud implements OnInit {
         ];
 
         this.cols = [
-            { field: 'code', header: 'Code', customExportHeader: 'Product Code' },
-            { field: 'name', header: 'Name' },
-            { field: 'image', header: 'Image' },
-            { field: 'price', header: 'Price' },
-            { field: 'category', header: 'Category' }
+            { field: 'username', header: 'Nombre de Usuario', customExportHeader: 'Product Code' },
+            { field: 'password', header: 'Contraseña' },
+            { field: 'roles', header: 'Rol' },
+            { field: 'fullName', header: 'Nombre Completo' }
         ];
 
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
@@ -256,37 +261,35 @@ export class ProductCrud implements OnInit {
     }
 
     openNew() {
-        this.product = {
+        this.user = {
             id: 0,
-            code: "",
-            cost_price: 0,
-            description: "",
-            name: "",
-            quantity: 0,
-            retail_price: 0,
-            category_id: 0,
-            supplier_id: 0
+            username: "",
+            password: "",
+            roles: "",
+            fullName: "",
+            sales: 0,
+            earnings: 0
         };
         this.submitted = false;
-        this.productDialog = true;
+        this.userDialog = true;
     }
 
-    editProduct(product: Product) {
-        this.product = { ...product };
-        this.productDialog = true;
+    editUser(user: User) {
+        this.user = { ...user };
+        this.userDialog = true;
     }
 
-    deleteSelectedProducts() {
+    deleteSelectedUsers() {
         this.confirmationService.confirm({
-            message: 'Are you sure you want to delete the selected products?',
+            message: 'Are you sure you want to delete the selected userrs?',
             header: 'Confirm',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.selectedProducts?.forEach(prod => {
-                    this.productService.deleteProduct(prod.id).subscribe();
+                this.selectedUsers?.forEach(prod => {
+                    this.userService.deleteUser(prod.id).subscribe();
                 });
                 this.loadDemoData();
-                this.selectedProducts = null;
+                this.selectedUsers = null;
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Successful',
@@ -298,17 +301,17 @@ export class ProductCrud implements OnInit {
     }
 
     hideDialog() {
-        this.productDialog = false;
+        this.userDialog = false;
         this.submitted = false;
     }
 
-    deleteProduct(product: Product) {
+    deleteUser(user: User) {
         this.confirmationService.confirm({
-            message: 'Are you sure you want to delete ' + product.name + '?',
+            message: 'Are you sure you want to delete ' + user.username + '?',
             header: 'Confirm',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.productService.deleteProduct(product.id).subscribe((success) => {
+                this.userService.deleteUser(user.id).subscribe((success) => {
                     if (success) {
                         this.loadDemoData();
                         this.messageService.add({
@@ -319,16 +322,14 @@ export class ProductCrud implements OnInit {
                         });
                     }
                 });
-                this.product = {
+                this.user = {
                     id: 0,
-                    code: "",
-                    cost_price: 0,
-                    description: "",
-                    name: "",
-                    quantity: 0,
-                    retail_price: 0,
-                    category_id: 0,
-                    supplier_id: 0
+                    username: "",
+                    password: "",
+                    roles: "",
+                    fullName: "",
+                    sales: 0,
+                    earnings: 0
                 };
             }
         });
@@ -347,12 +348,12 @@ export class ProductCrud implements OnInit {
         }
     }
 
-    saveProduct() {
+    saveUser() {
         this.submitted = true;
-        let _products = this.products();
-        if (this.product.name?.trim()) {
-            if (this.product.id) {
-                this.productService.updateProduct(this.product).subscribe((updatedProduct) => {
+        let _users = this.users();
+        if (this.user.username?.trim()) {
+            if (this.user.id) {
+                this.userService.updateUser(this.user).subscribe((updatedUser) => {
                     this.loadDemoData();
                     this.messageService.add({
                         severity: 'success',
@@ -362,27 +363,25 @@ export class ProductCrud implements OnInit {
                     });
                 });
             } else {
-                this.productService.addProduct(this.product).subscribe((newProduct) => {
+                this.userService.addUser(this.user).subscribe((newProduct) => {
                     this.loadDemoData();
                     this.messageService.add({
                         severity: 'success',
                         summary: 'Successful',
-                        detail: 'Product Created',
+                        detail: 'User Created',
                         life: 3000
                     });
                 });
             }
-            this.productDialog = false;
-            this.product = {
+            this.userDialog = false;
+            this.user = {
                 id: 0,
-                code: "",
-                cost_price: 0,
-                description: "",
-                name: "",
-                quantity: 0,
-                retail_price: 0,
-                category_id: 0,
-                supplier_id: 0
+                username: "",
+                password: "",
+                roles: "",
+                fullName: "",
+                sales: 0,
+                earnings: 0
             };
         }
     }

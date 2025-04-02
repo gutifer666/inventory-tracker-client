@@ -6,8 +6,9 @@ import { Login } from './app/share/pages/auth/login';
 import { EmployeeDashboard } from './app/employee/pages/dashboard/employee-dashboard';
 import { Documentation } from './app/share/pages/documentation/documentation';
 import { Landing } from './app/share/pages/landing/landing';
-import { ProductCrud } from './app/share/pages/product/product-crud';
+import { ProductCrud } from './app/admin/pages/product/pages/product-crud';
 import { Notfound } from './app/share/pages/notfound/notfound';
+import { UserCrud } from './app/admin/pages/user/pages/user-crud';
 
 export const appRoutes: Routes = [
     { path: '', component: Login },
@@ -18,6 +19,7 @@ export const appRoutes: Routes = [
         children: [
             { path: '', component: AdminDashboard },
             { path: 'product', component: ProductCrud },
+            { path: 'user', component: UserCrud },
             { path: 'documentation', component: Documentation }
         ]
     },
