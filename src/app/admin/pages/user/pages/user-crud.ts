@@ -57,10 +57,8 @@ interface ExportColumn {
     template: `
         <p-toolbar styleClass="mb-6">
             <ng-template #start>
-                <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-                <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined
-                          (onClick)="deleteSelectedUsers()"
-                          [disabled]="!selectedUsers || !selectedUsers.length" />
+                <p-button label="Nuevo" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+                <p-button severity="secondary" label="Borrar" icon="pi pi-trash" outlined (onClick)="deleteSelectedUsers()" [disabled]="!selectedUsers || !selectedUsers.length" />
             </ng-template>
 
             <ng-template #end>
@@ -74,7 +72,7 @@ interface ExportColumn {
             [rows]="10"
             [columns]="cols"
             [paginator]="true"
-            [globalFilterFields]="['username']"
+            [globalFilterFields]="['username', 'password', 'roles', 'fullName']"
             [tableStyle]="{ 'min-width': '75rem' }"
             [(selection)]="selectedUsers"
             [rowHover]="true"
@@ -97,18 +95,21 @@ interface ExportColumn {
                     <th style="width: 3rem">
                         <p-tableHeaderCheckbox />
                     </th>
-                    <th style="min-width: 16rem">Nombre del Usuario</th>
-                    <th pSortableColumn="name" style="min-width:16rem">
+                    <th pSortableColumn="username" style="min-width: 16rem">
+                        Nombre del Usuario
+                        <p-sortIcon field="username" />
+                    </th>
+                    <th pSortableColumn="password" style="min-width:16rem">
                         Contraseña
-                        <p-sortIcon field="name" />
+                        <p-sortIcon field="password" />
                     </th>
-                    <th pSortableColumn="price" style="min-width: 8rem">
+                    <th pSortableColumn="roles" style="min-width: 8rem">
                         Rol
-                        <p-sortIcon field="price" />
+                        <p-sortIcon field="roles" />
                     </th>
-                    <th pSortableColumn="category" style="min-width:10rem">
+                    <th pSortableColumn="fullName" style="min-width:10rem">
                         Nombre Completo
-                        <p-sortIcon field="category" />
+                        <p-sortIcon field="fullName" />
                     </th>
                     <th style="min-width: 12rem"></th>
                 </tr>
@@ -118,15 +119,13 @@ interface ExportColumn {
                     <td style="width: 3rem">
                         <p-tableCheckbox [value]="user" />
                     </td>
-                    <td style="min-width: 12rem">{{ user.username }}</td>
+                    <td style="min-width: 16rem">{{ user.username }}</td>
                     <td style="min-width: 16rem">{{ user.password }}</td>
-                    <td>{{ user.roles }}</td>
-                    <td>{{ user.fullName }}</td>
+                    <td style="min-width: 16rem">{{ user.roles }}</td>
+                    <td style="min-width: 16rem">{{ user.fullName }}</td>
                     <td>
-                        <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true"
-                                  (click)="editUser(user)" />
-                        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
-                                  (click)="deleteUser(user)" />
+                        <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editUser(user)" />
+                        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteUser(user)" />
                     </td>
                 </tr>
             </ng-template>
@@ -136,59 +135,39 @@ interface ExportColumn {
             <ng-template #content>
                 <div class="flex flex-col gap-6">
                     <div>
-                        <label for="name" class="block font-bold mb-3">Nombre de Usuario</label>
-                        <input type="text" pInputText id="name" [(ngModel)]="user.username" required autofocus fluid />
+                        <label for="username" class="block font-bold mb-3">Nombre de Usuario</label>
+                        <input type="text" pInputText id="username" [(ngModel)]="user.username" required autofocus fluid />
                         <small class="text-red-500" *ngIf="submitted && !user.username">Nombre requerido.</small>
                     </div>
-                    <!--<div>
-                        <label for="description" class="block font-bold mb-3">Descripción</label>
-                        <textarea id="description" pTextarea [(ngModel)]="user.description" required rows="3"
-                                  cols="20" fluid></textarea>
+
+                    <div>
+                        <label for="password" class="block font-bold mb-3">Contraseña</label>
+                        <textarea id="password" pTextarea [(ngModel)]="user.password" required rows="1" cols="20" fluid></textarea>
                     </div>
 
                     <div>
-                        <label for="inventoryStatus" class="block font-bold mb-3">Código</label>
-                        <p-select [(ngModel)]="user.quantity" inputId="inventoryStatus" [options]="statuses"
-                                  optionLabel="label" optionValue="label" placeholder="Select a Status" fluid />
-                    </div>
-
-                    <div>
-                        <span class="block font-bold mb-4">Categoría</span>
+                        <span class="block font-bold mb-4">Rol</span>
                         <div class="grid grid-cols-12 gap-4">
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category1" name="category" value="Accessories"
-                                               [(ngModel)]="user.category_id" />
-                                <label for="category1">Accessories</label>
+                                <p-radiobutton id="rol1" name="rol" value="ROLE_ADMIN" [(ngModel)]="user.roles" />
+                                <label for="rol1">Administrador</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category2" name="category" value="Clothing"
-                                               [(ngModel)]="user.category_id" />
-                                <label for="category2">Clothing</label>
+                                <p-radiobutton id="rol2" name="rol" value="ROLE_EMPLOYEE" [(ngModel)]="user.roles" />
+                                <label for="rol2">Empleado</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category3" name="category" value="Electronics"
-                                               [(ngModel)]="user.category_id" />
-                                <label for="category3">Electronics</label>
-                            </div>
-                            <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category4" name="category" value="Fitness"
-                                               [(ngModel)]="user.category_id" />
-                                <label for="category4">Fitness</label>
+                                <p-radiobutton id="rol3" name="rol" value="ROLE_CUSTOMER" [(ngModel)]="user.roles" />
+                                <label for="rol3">Cliente</label>
                             </div>
                         </div>
-                    </div>-->
+                    </div>
 
-<!--                    <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-6">
-                            <label for="price" class="block font-bold mb-3">Precio</label>
-                            <p-inputnumber id="price" [(ngModel)]="user.retail_price" mode="currency" currency="EUR"
-                                           locale="en-US" fluid />
-                        </div>
-                        <div class="col-span-6">
-                            <label for="quantity" class="block font-bold mb-3">Cantidad</label>
-                            <p-inputnumber id="quantity" [(ngModel)]="user.quantity" fluid />
-                        </div>
-                    </div>-->
+                    <div>
+                        <label for="fullName" class="block font-bold mb-3">Nombre Completo</label>
+                        <input type="text" pInputText id="fullName" [(ngModel)]="user.fullName" required autofocus fluid />
+                        <small class="text-red-500" *ngIf="submitted && !user.fullName">Nombre Completo requerido.</small>
+                    </div>
                 </div>
             </ng-template>
 
@@ -212,8 +191,6 @@ export class UserCrud implements OnInit {
     selectedUsers!: User[] | null;
 
     submitted: boolean = false;
-
-    statuses!: any[];
 
     @ViewChild('dt') dt!: Table;
 
@@ -240,12 +217,6 @@ export class UserCrud implements OnInit {
             this.users.set(data);
         });
 
-        this.statuses = [
-            { label: 'INSTOCK', value: 'instock' },
-            { label: 'LOWSTOCK', value: 'lowstock' },
-            { label: 'OUTOFSTOCK', value: 'outofstock' }
-        ];
-
         this.cols = [
             { field: 'username', header: 'Nombre de Usuario', customExportHeader: 'Product Code' },
             { field: 'password', header: 'Contraseña' },
@@ -263,10 +234,10 @@ export class UserCrud implements OnInit {
     openNew() {
         this.user = {
             id: 0,
-            username: "",
-            password: "",
-            roles: "",
-            fullName: "",
+            username: '',
+            password: '',
+            roles: '',
+            fullName: '',
             sales: 0,
             earnings: 0
         };
@@ -285,7 +256,7 @@ export class UserCrud implements OnInit {
             header: 'Confirm',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.selectedUsers?.forEach(prod => {
+                this.selectedUsers?.forEach((prod) => {
                     this.userService.deleteUser(prod.id).subscribe();
                 });
                 this.loadDemoData();
@@ -324,28 +295,15 @@ export class UserCrud implements OnInit {
                 });
                 this.user = {
                     id: 0,
-                    username: "",
-                    password: "",
-                    roles: "",
-                    fullName: "",
+                    username: '',
+                    password: '',
+                    roles: '',
+                    fullName: '',
                     sales: 0,
                     earnings: 0
                 };
             }
         });
-    }
-
-    getSeverity(status: string) {
-        switch (status) {
-            case 'INSTOCK':
-                return 'success';
-            case 'LOWSTOCK':
-                return 'warn';
-            case 'OUTOFSTOCK':
-                return 'danger';
-            default:
-                return 'info';
-        }
     }
 
     saveUser() {
@@ -376,10 +334,10 @@ export class UserCrud implements OnInit {
             this.userDialog = false;
             this.user = {
                 id: 0,
-                username: "",
-                password: "",
-                roles: "",
-                fullName: "",
+                username: '',
+                password: '',
+                roles: '',
+                fullName: '',
                 sales: 0,
                 earnings: 0
             };
