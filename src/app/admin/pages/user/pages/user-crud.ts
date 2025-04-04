@@ -218,7 +218,7 @@ export class UserCrud implements OnInit {
         });
 
         this.cols = [
-            { field: 'username', header: 'Nombre de Usuario', customExportHeader: 'Product Code' },
+            { field: 'username', header: 'Nombre de Usuario', customExportHeader: 'User Name' },
             { field: 'password', header: 'Contraseña' },
             { field: 'roles', header: 'Rol' },
             { field: 'fullName', header: 'Nombre Completo' }

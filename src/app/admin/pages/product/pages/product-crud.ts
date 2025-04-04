@@ -57,8 +57,8 @@ interface ExportColumn {
     template: `
         <p-toolbar styleClass="mb-6">
             <ng-template #start>
-                <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-                <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+                <p-button label="Nuevo" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+                <p-button severity="secondary" label="Borrar" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
             </ng-template>
 
             <ng-template #end>
@@ -72,7 +72,7 @@ interface ExportColumn {
             [rows]="10"
             [columns]="cols"
             [paginator]="true"
-            [globalFilterFields]="['name']"
+            [globalFilterFields]="['code', 'name', 'category', 'supplier', 'costPrice' , 'retailPrice', 'quantity']"
             [tableStyle]="{ 'min-width': '75rem' }"
             [(selection)]="selectedProducts"
             [rowHover]="true"
@@ -95,22 +95,30 @@ interface ExportColumn {
                     <th style="width: 3rem">
                         <p-tableHeaderCheckbox />
                     </th>
-                    <th style="min-width: 16rem">Code</th>
+                    <th style="min-width: 16rem">Código</th>
                     <th pSortableColumn="name" style="min-width:16rem">
                         Nombre
                         <p-sortIcon field="name" />
-                    </th>
-                    <th pSortableColumn="price" style="min-width: 8rem">
-                        Precio
-                        <p-sortIcon field="price" />
                     </th>
                     <th pSortableColumn="category" style="min-width:10rem">
                         Categoría
                         <p-sortIcon field="category" />
                     </th>
-                    <th pSortableColumn="inventoryStatus" style="min-width: 12rem">
+                    <th pSortableColumn="supplier" style="min-width:10rem">
+                        Proveedor
+                        <p-sortIcon field="supplier" />
+                    </th>
+                    <th pSortableColumn="costPrice" style="min-width: 8rem">
+                        Precio de Costo
+                        <p-sortIcon field="costPrice" />
+                    </th>
+                    <th pSortableColumn="retailPrice" style="min-width: 8rem">
+                        Precio de Venta
+                        <p-sortIcon field="retailPrice" />
+                    </th>
+                    <th pSortableColumn="quantity" style="min-width: 12rem">
                         Cantidad
-                        <p-sortIcon field="inventoryStatus" />
+                        <p-sortIcon field="quantity" />
                     </th>
                     <th style="min-width: 12rem"></th>
                 </tr>
@@ -122,8 +130,10 @@ interface ExportColumn {
                     </td>
                     <td style="min-width: 12rem">{{ product.code }}</td>
                     <td style="min-width: 16rem">{{ product.name }}</td>
-                    <td>{{ product.retail_price | currency: 'EUR' }}</td>
                     <td>{{ product.category_id }}</td>
+                    <td>{{ product.supplier_id }}</td>
+                    <td>{{ product.cost_price | currency: 'EUR' }}</td>
+                    <td>{{ product.retail_price | currency: 'EUR' }}</td>
                     <td>{{ product.quantity}}</td>
                     <td>
                         <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(product)" />
@@ -137,6 +147,11 @@ interface ExportColumn {
             <ng-template #content>
                 <div class="flex flex-col gap-6">
                     <div>
+                        <label for="code" class="block font-bold mb-3">Código</label>
+                        <input type="text" pInputText id="code" [(ngModel)]="product.code" required autofocus fluid />
+                        <small class="text-red-500" *ngIf="submitted && !product.code">Código requerido.</small>
+                    </div>
+                    <div>
                         <label for="name" class="block font-bold mb-3">Nombre</label>
                         <input type="text" pInputText id="name" [(ngModel)]="product.name" required autofocus fluid />
                         <small class="text-red-500" *ngIf="submitted && !product.name">Nombre requerido.</small>
@@ -144,11 +159,6 @@ interface ExportColumn {
                     <div>
                         <label for="description" class="block font-bold mb-3">Descripción</label>
                         <textarea id="description" pTextarea [(ngModel)]="product.description" required rows="3" cols="20" fluid></textarea>
-                    </div>
-
-                    <div>
-                        <label for="inventoryStatus" class="block font-bold mb-3">Código</label>
-                        <p-select [(ngModel)]="product.quantity" inputId="inventoryStatus" [options]="statuses" optionLabel="label" optionValue="label" placeholder="Select a Status" fluid />
                     </div>
 
                     <div>
@@ -173,14 +183,26 @@ interface ExportColumn {
                         </div>
                     </div>
 
+                    <div>
+                        <label for="supplier" class="block font-bold mb-3">Proveedor</label>
+                        <input type="text" pInputText id="supplier" [(ngModel)]="product.supplier_id" required autofocus fluid />
+                        <small class="text-red-500" *ngIf="submitted && !product.name">Proveedor requerido.</small>
+                    </div>
+
+                    <div>
+                        <label for="quantity" class="block font-bold mb-3">Cantidad</label>
+                        <input type="text" pInputText id="quantity" [(ngModel)]="product.quantity" required autofocus fluid />
+                        <small class="text-red-500" *ngIf="submitted && !product.name">Cantidad requerida.</small>
+                    </div>
+
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-6">
-                            <label for="price" class="block font-bold mb-3">Precio</label>
-                            <p-inputnumber id="price" [(ngModel)]="product.retail_price" mode="currency" currency="EUR" locale="en-US" fluid />
+                            <label for="totalPrice" class="block font-bold mb-3">Precio de costo</label>
+                            <p-inputnumber id="totalPrice" [(ngModel)]="product.cost_price" mode="currency" currency="EUR" locale="en-US" fluid />
                         </div>
                         <div class="col-span-6">
-                            <label for="quantity" class="block font-bold mb-3">Cantidad</label>
-                            <p-inputnumber id="quantity" [(ngModel)]="product.quantity" fluid />
+                            <label for="retailPrice" class="block font-bold mb-3">Precio de Venta</label>
+                            <p-inputnumber id="retailPrice" [(ngModel)]="product.retail_price" mode="currency" currency="EUR" locale="en-US" fluid />
                         </div>
                     </div>
                 </div>
@@ -242,10 +264,11 @@ export class ProductCrud implements OnInit {
 
         this.cols = [
             { field: 'code', header: 'Code', customExportHeader: 'Product Code' },
-            { field: 'name', header: 'Name' },
-            { field: 'image', header: 'Image' },
-            { field: 'price', header: 'Price' },
-            { field: 'category', header: 'Category' }
+            { field: 'category_id', header: 'Category' },
+            { field: 'supplier_id', header: 'Supplier' },
+            { field: 'cost_price', header: 'Cost Price' },
+            { field: 'retail_price', header: 'Retail Price' },
+            { field: 'quantity', header: 'Quantity' }
         ];
 
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
