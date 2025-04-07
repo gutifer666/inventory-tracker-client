@@ -6,9 +6,11 @@ import { Login } from './app/share/pages/auth/login';
 import { EmployeeDashboard } from './app/employee/pages/dashboard/employee-dashboard';
 import { Documentation } from './app/share/pages/documentation/documentation';
 import { Landing } from './app/share/pages/landing/landing';
-import { ProductCrud } from './app/admin/pages/product/pages/product-crud';
+import { ProductCrud } from './app/admin/pages/product/views/product-crud';
 import { Notfound } from './app/share/pages/notfound/notfound';
-import { UserCrud } from './app/admin/pages/user/pages/user-crud';
+import { UserCrud } from './app/admin/pages/user/views/user-crud';
+import { CategoryCrud } from './app/admin/pages/category/views/category-crud';
+import { SupplierCrud } from './app/admin/pages/supplier/views/supplier-crud';
 
 export const appRoutes: Routes = [
     { path: '', component: Login },
@@ -20,6 +22,8 @@ export const appRoutes: Routes = [
             { path: '', component: AdminDashboard },
             { path: 'product', component: ProductCrud },
             { path: 'user', component: UserCrud },
+            { path: 'category', component: CategoryCrud },
+            { path: 'supplier', component: SupplierCrud },
             { path: 'documentation', component: Documentation }
         ]
     },

@@ -18,7 +18,10 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DropdownModule } from 'primeng/dropdown';
 import { Product, ProductService } from '../services/product.service';
+import { Category, CategoryService } from '../../category/services/category.service';
+import { Supplier, SupplierService } from '../../supplier/services/supplier.service';
 
 interface Column {
     field: string;
@@ -52,7 +55,8 @@ interface ExportColumn {
         TagModule,
         InputIconModule,
         IconFieldModule,
-        ConfirmDialogModule
+        ConfirmDialogModule,
+        DropdownModule
     ],
     template: `
         <p-toolbar styleClass="mb-6">
@@ -130,8 +134,8 @@ interface ExportColumn {
                     </td>
                     <td style="min-width: 12rem">{{ product.code }}</td>
                     <td style="min-width: 16rem">{{ product.name }}</td>
-                    <td>{{ product.category_id }}</td>
-                    <td>{{ product.supplier_id }}</td>
+                    <td>{{ getCategoryName(product.category_id) }}</td>
+                    <td>{{ getSupplierName(product.supplier_id) }}</td>
                     <td>{{ product.cost_price | currency: 'EUR' }}</td>
                     <td>{{ product.retail_price | currency: 'EUR' }}</td>
                     <td>{{ product.quantity}}</td>
@@ -143,7 +147,7 @@ interface ExportColumn {
             </ng-template>
         </p-table>
 
-        <p-dialog [(visible)]="productDialog" [style]="{ width: '450px' }" header="Detalles del Producto" [modal]="true">
+        <p-dialog [(visible)]="productDialog" [style]="{ width: '550px' }" header="Detalles del Producto" [modal]="true" styleClass="p-fluid">
             <ng-template #content>
                 <div class="flex flex-col gap-6">
                     <div>
@@ -162,47 +166,54 @@ interface ExportColumn {
                     </div>
 
                     <div>
-                        <span class="block font-bold mb-4">Categoría</span>
-                        <div class="grid grid-cols-12 gap-4">
-                            <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category1" name="category" value="Accessories" [(ngModel)]="product.category_id" />
-                                <label for="category1">Accessories</label>
-                            </div>
-                            <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category2" name="category" value="Clothing" [(ngModel)]="product.category_id" />
-                                <label for="category2">Clothing</label>
-                            </div>
-                            <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category3" name="category" value="Electronics" [(ngModel)]="product.category_id" />
-                                <label for="category3">Electronics</label>
-                            </div>
-                            <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category4" name="category" value="Fitness" [(ngModel)]="product.category_id" />
-                                <label for="category4">Fitness</label>
-                            </div>
-                        </div>
+                        <label for="category" class="block font-bold mb-3">Categoría</label>
+                        <p-dropdown id="category" [options]="categories()" [(ngModel)]="product.category_id" optionLabel="name" optionValue="id" placeholder="Seleccione una categoría" [filter]="true" filterBy="name" [showClear]="true" styleClass="w-full" [style]="{'width':'100%'}">
+                            <ng-template pTemplate="selectedItem">
+                                <div class="flex align-items-center gap-2" *ngIf="product.category_id">
+                                    <div>{{ getCategoryName(product.category_id) }}</div>
+                                </div>
+                            </ng-template>
+                            <ng-template let-category pTemplate="item">
+                                <div class="flex align-items-center gap-2">
+                                    <div>{{ category.name }}</div>
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                        <small class="text-red-500" *ngIf="submitted && !product.category_id">Categoría requerida.</small>
                     </div>
 
                     <div>
                         <label for="supplier" class="block font-bold mb-3">Proveedor</label>
-                        <input type="text" pInputText id="supplier" [(ngModel)]="product.supplier_id" required autofocus fluid />
-                        <small class="text-red-500" *ngIf="submitted && !product.name">Proveedor requerido.</small>
+                        <p-dropdown id="supplier" [options]="suppliers()" [(ngModel)]="product.supplier_id" optionLabel="name" optionValue="id" placeholder="Seleccione un proveedor" [filter]="true" filterBy="name" [showClear]="true" styleClass="w-full" [style]="{'width':'100%'}">
+                            <ng-template pTemplate="selectedItem">
+                                <div class="flex align-items-center gap-2" *ngIf="product.supplier_id">
+                                    <div>{{ getSupplierName(product.supplier_id) }}</div>
+                                </div>
+                            </ng-template>
+                            <ng-template let-supplier pTemplate="item">
+                                <div class="flex align-items-center gap-2">
+                                    <div>{{ supplier.name }}</div>
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                        <small class="text-red-500" *ngIf="submitted && !product.supplier_id">Proveedor requerido.</small>
                     </div>
 
                     <div>
                         <label for="quantity" class="block font-bold mb-3">Cantidad</label>
-                        <input type="text" pInputText id="quantity" [(ngModel)]="product.quantity" required autofocus fluid />
-                        <small class="text-red-500" *ngIf="submitted && !product.name">Cantidad requerida.</small>
+                        <p-inputnumber id="quantity" [(ngModel)]="product.quantity" [showButtons]="true" buttonLayout="horizontal" spinnerMode="horizontal"
+                            decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" [min]="0" [step]="1" styleClass="w-full" />
+                        <small class="text-red-500" *ngIf="submitted && !product.quantity">Cantidad requerida.</small>
                     </div>
 
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-6">
                             <label for="totalPrice" class="block font-bold mb-3">Precio de costo</label>
-                            <p-inputnumber id="totalPrice" [(ngModel)]="product.cost_price" mode="currency" currency="EUR" locale="en-US" fluid />
+                            <p-inputnumber id="totalPrice" [(ngModel)]="product.cost_price" mode="currency" currency="EUR" locale="es-ES" [minFractionDigits]="2" styleClass="w-full" />
                         </div>
                         <div class="col-span-6">
                             <label for="retailPrice" class="block font-bold mb-3">Precio de Venta</label>
-                            <p-inputnumber id="retailPrice" [(ngModel)]="product.retail_price" mode="currency" currency="EUR" locale="en-US" fluid />
+                            <p-inputnumber id="retailPrice" [(ngModel)]="product.retail_price" mode="currency" currency="EUR" locale="es-ES" [minFractionDigits]="2" styleClass="w-full" />
                         </div>
                     </div>
                 </div>
@@ -210,18 +221,20 @@ interface ExportColumn {
 
             <ng-template #footer>
                 <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
-                <p-button label="Añadir" icon="pi pi-check" (click)="saveProduct()" />
+                <p-button [label]="product.id ? 'Actualizar' : 'Añadir'" icon="pi pi-check" (click)="saveProduct()" />
             </ng-template>
         </p-dialog>
 
         <p-confirmdialog [style]="{ width: '450px' }" />
     `,
-    providers: [MessageService, ProductService, ConfirmationService]
+    providers: [MessageService, ProductService, CategoryService, SupplierService, ConfirmationService]
 })
 export class ProductCrud implements OnInit {
     productDialog: boolean = false;
 
     products = signal<Product[]>([]);
+    categories = signal<Category[]>([]);
+    suppliers = signal<Supplier[]>([]);
 
     product!: Product;
 
@@ -239,6 +252,8 @@ export class ProductCrud implements OnInit {
 
     constructor(
         private productService: ProductService,
+        private categoryService: CategoryService,
+        private supplierService: SupplierService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService
     ) {}
@@ -256,6 +271,8 @@ export class ProductCrud implements OnInit {
             this.products.set(data);
         });
 
+        this.loadCategoriesAndSuppliers();
+
         this.statuses = [
             { label: 'INSTOCK', value: 'instock' },
             { label: 'LOWSTOCK', value: 'lowstock' },
@@ -263,15 +280,28 @@ export class ProductCrud implements OnInit {
         ];
 
         this.cols = [
-            { field: 'code', header: 'Code', customExportHeader: 'Product Code' },
-            { field: 'category_id', header: 'Category' },
-            { field: 'supplier_id', header: 'Supplier' },
-            { field: 'cost_price', header: 'Cost Price' },
-            { field: 'retail_price', header: 'Retail Price' },
-            { field: 'quantity', header: 'Quantity' }
+            { field: 'code', header: 'Código', customExportHeader: 'Código de Producto' },
+            { field: 'name', header: 'Nombre' },
+            { field: 'category_id', header: 'Categoría' },
+            { field: 'supplier_id', header: 'Proveedor' },
+            { field: 'cost_price', header: 'Precio de Costo' },
+            { field: 'retail_price', header: 'Precio de Venta' },
+            { field: 'quantity', header: 'Cantidad' }
         ];
 
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
+    }
+
+    loadCategoriesAndSuppliers() {
+        // Cargar categorías actualizadas
+        this.categoryService.getCategories().subscribe((data) => {
+            this.categories.set(data);
+        });
+
+        // Cargar proveedores actualizados
+        this.supplierService.getSuppliers().subscribe((data) => {
+            this.suppliers.set(data);
+        });
     }
 
     onGlobalFilter(table: Table, event: Event) {
@@ -279,6 +309,9 @@ export class ProductCrud implements OnInit {
     }
 
     openNew() {
+        // Recargar categorías y proveedores para tener los datos actualizados
+        this.loadCategoriesAndSuppliers();
+
         this.product = {
             id: 0,
             code: "",
@@ -295,27 +328,41 @@ export class ProductCrud implements OnInit {
     }
 
     editProduct(product: Product) {
+        // Recargar categorías y proveedores para tener los datos actualizados
+        this.loadCategoriesAndSuppliers();
+
         this.product = { ...product };
         this.productDialog = true;
     }
 
     deleteSelectedProducts() {
         this.confirmationService.confirm({
-            message: 'Are you sure you want to delete the selected products?',
-            header: 'Confirm',
+            message: '¿Está seguro de que desea eliminar los productos seleccionados?',
+            header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.selectedProducts?.forEach(prod => {
-                    this.productService.deleteProduct(prod.id).subscribe();
-                });
-                this.loadDemoData();
-                this.selectedProducts = null;
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Products Deleted',
-                    life: 3000
-                });
+                // Crear un array de promesas para eliminar todos los productos seleccionados
+                const deletePromises = this.selectedProducts?.map(prod =>
+                    this.productService.deleteProduct(prod.id)
+                );
+
+                // Esperar a que todas las eliminaciones se completen
+                if (deletePromises && deletePromises.length > 0) {
+                    // Usar forkJoin para esperar a que todas las operaciones se completen
+                    import('rxjs').then(({ forkJoin }) => {
+                        forkJoin(deletePromises).subscribe(() => {
+                            // Recargar todos los datos para asegurar que todo esté actualizado
+                            this.loadDemoData();
+                            this.selectedProducts = null;
+                            this.messageService.add({
+                                severity: 'success',
+                                summary: 'Exitoso',
+                                detail: 'Productos Eliminados',
+                                life: 3000
+                            });
+                        });
+                    });
+                }
             }
         });
     }
@@ -327,17 +374,18 @@ export class ProductCrud implements OnInit {
 
     deleteProduct(product: Product) {
         this.confirmationService.confirm({
-            message: 'Are you sure you want to delete ' + product.name + '?',
-            header: 'Confirm',
+            message: '¿Está seguro de que desea eliminar ' + product.name + '?',
+            header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
                 this.productService.deleteProduct(product.id).subscribe((success) => {
                     if (success) {
+                        // Recargar todos los datos para asegurar que todo esté actualizado
                         this.loadDemoData();
                         this.messageService.add({
                             severity: 'success',
-                            summary: 'Successful',
-                            detail: 'Product Deleted',
+                            summary: 'Exitoso',
+                            detail: 'Producto Eliminado',
                             life: 3000
                         });
                     }
@@ -370,27 +418,39 @@ export class ProductCrud implements OnInit {
         }
     }
 
+    getCategoryName(categoryId: number): string {
+        const category = this.categories().find(c => c.id === categoryId);
+        return category ? category.name : 'No asignada';
+    }
+
+    getSupplierName(supplierId: number): string {
+        const supplier = this.suppliers().find(s => s.id === supplierId);
+        return supplier ? supplier.name : 'No asignado';
+    }
+
     saveProduct() {
         this.submitted = true;
         let _products = this.products();
         if (this.product.name?.trim()) {
             if (this.product.id) {
                 this.productService.updateProduct(this.product).subscribe((updatedProduct) => {
+                    // Recargar todos los datos para asegurar que todo esté actualizado
                     this.loadDemoData();
                     this.messageService.add({
                         severity: 'success',
-                        summary: 'Successful',
-                        detail: 'Product Updated',
+                        summary: 'Exitoso',
+                        detail: 'Producto Actualizado',
                         life: 3000
                     });
                 });
             } else {
                 this.productService.addProduct(this.product).subscribe((newProduct) => {
+                    // Recargar todos los datos para asegurar que todo esté actualizado
                     this.loadDemoData();
                     this.messageService.add({
                         severity: 'success',
-                        summary: 'Successful',
-                        detail: 'Product Created',
+                        summary: 'Exitoso',
+                        detail: 'Producto Creado',
                         life: 3000
                     });
                 });

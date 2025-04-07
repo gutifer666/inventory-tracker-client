@@ -28,7 +28,9 @@ export class AppMenu {
                 label: 'Administrar',
                 items: [
                     { label: 'Usuarios', icon: 'pi pi-fw pi-user', routerLink: ['/admin/user'] },
-                    { label: 'Productos', icon: 'pi pi-fw pi-check-square', routerLink: ['/admin/product'] }
+                    { label: 'Productos', icon: 'pi pi-fw pi-check-square', routerLink: ['/admin/product'] },
+                    { label: 'Categorías', icon: 'pi pi-fw pi-tags', routerLink: ['/admin/category'] },
+                    { label: 'Proveedores', icon: 'pi pi-fw pi-briefcase', routerLink: ['/admin/supplier'] }
                 ]
             },
             {
