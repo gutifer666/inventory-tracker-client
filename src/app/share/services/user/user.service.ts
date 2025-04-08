@@ -32,8 +32,8 @@ private users: User[] = [
     password: "$2a$10$TW9wmcAMesXeH1naGswppOMcSA70FkdDs3oH9e7I8BPujPwEXwaE6",
     roles: "ROLE_EMPLOYEE",
     fullName: "Empleado de Prueba",
-    sales: 0,
-    earnings: 0
+    sales: 12,
+    earnings: 2155
   },
   {
     id: 3,
