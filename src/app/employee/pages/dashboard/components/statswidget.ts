@@ -1,81 +1,76 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
+import { UserService, User } from '../../../../share/services/user/user.service';
 import { LoginService } from '../../../../share/services/login/login.service';
 
 @Component({
     standalone: true,
     selector: 'app-stats-widget',
-    imports: [CommonModule, CurrencyPipe],
-    template: `
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-        <!-- Widget de Ventas -->
-        <div class="col-span-1">
-            <div class="card shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
-                <div class="p-4">
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <h5 class="text-lg font-semibold text-gray-700 dark:text-gray-200 m-0">Ventas</h5>
-                            <div class="text-3xl font-bold text-surface-900 dark:text-surface-0 mt-2">{{ employeeSales }}</div>
-                        </div>
-                        <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/30 rounded-full p-3">
-                            <i class="pi pi-shopping-cart text-blue-600 dark:text-blue-300 text-xl"></i>
-                        </div>
+    imports: [CommonModule],
+    providers: [UserService, LoginService],
+    template: `<div class="col-span-12 lg:col-span-6 xl:col-span-3">
+            <div class="card mb-0">
+                <div class="flex justify-between mb-4">
+                    <div>
+                        <span class="block text-muted-color font-medium mb-4">Ventas</span>
+                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ sales }}</div>
                     </div>
-                    <div class="border-t pt-3 mt-2 border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center">
-                            <i class="pi pi-arrow-up text-green-500 mr-1"></i>
-                            <span class="text-green-500 font-medium">+5% </span>
-                            <span class="text-gray-500 dark:text-gray-400 ml-1">vs mes anterior</span>
-                        </div>
+                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                        <i class="pi pi-shopping-cart text-blue-500 !text-xl"></i>
                     </div>
                 </div>
+                <span class="text-primary font-medium">{{ employeeName }}</span>
+                <span class="text-muted-color"> - Empleado</span>
             </div>
         </div>
-
-        <!-- Widget de Ganancias -->
-        <div class="col-span-1">
-            <div class="card shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
-                <div class="p-4">
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <h5 class="text-lg font-semibold text-gray-700 dark:text-gray-200 m-0">Ganancias</h5>
-                            <div class="text-3xl font-bold text-surface-900 dark:text-surface-0 mt-2">{{ employeeEarnings | currency:'EUR' }}</div>
-                        </div>
-                        <div class="flex items-center justify-center bg-orange-100 dark:bg-orange-400/30 rounded-full p-3">
-                            <i class="pi pi-euro text-orange-600 dark:text-orange-300 text-xl"></i>
-                        </div>
+        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+            <div class="card mb-0">
+                <div class="flex justify-between mb-4">
+                    <div>
+                        <span class="block text-muted-color font-medium mb-4">Ganancias</span>
+                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">€{{ earnings }}</div>
                     </div>
-                    <div class="border-t pt-3 mt-2 border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center">
-                            <i class="pi pi-arrow-up text-green-500 mr-1"></i>
-                            <span class="text-green-500 font-medium">+8% </span>
-                            <span class="text-gray-500 dark:text-gray-400 ml-1">vs mes anterior</span>
-                        </div>
+                    <div class="flex items-center justify-center bg-orange-100 dark:bg-orange-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                        <i class="pi pi-euro text-orange-500 !text-xl"></i>
                     </div>
                 </div>
+                <span class="text-primary font-medium">Datos actualizados</span>
+                <span class="text-muted-color"> - Hoy</span>
             </div>
-        </div>
-    </div>`
+        </div>`
 })
 export class StatsWidget implements OnInit {
-    employeeSales: number = 0;
-    employeeEarnings: number = 0;
+    sales: number = 0;
+    earnings: number = 0;
+    employeeName: string = '';
 
-    constructor(private loginService: LoginService) {}
+    constructor(
+        private userService: UserService,
+        private loginService: LoginService
+    ) {}
 
     ngOnInit() {
-        // Obtener el usuario logueado del LoginService
         const currentUser = this.loginService.getCurrentUser();
 
         if (currentUser) {
-            this.employeeSales = currentUser.sales;
-            this.employeeEarnings = currentUser.earnings;
-        } else {
-            // Si no hay usuario logueado, suscribirse al observable para detectar cuando se loguee
-            this.loginService.currentUser$.subscribe(user => {
+            // Obtener los datos del usuario desde UserService usando el ID del usuario logueado
+            this.userService.getUserById(currentUser.id).subscribe(user => {
                 if (user) {
-                    this.employeeSales = user.sales;
-                    this.employeeEarnings = user.earnings;
+                    this.sales = user.sales;
+                    this.earnings = user.earnings;
+                    this.employeeName = user.fullName;
+                }
+            });
+        } else {
+            console.warn('No hay usuario logueado. Usando datos de ejemplo.');
+            // Fallback a un ID de empleado por defecto si no hay usuario logueado
+            const defaultEmployeeId = 2; // ID del empleado de prueba
+
+            this.userService.getUserById(defaultEmployeeId).subscribe(user => {
+                if (user) {
+                    this.sales = user.sales;
+                    this.earnings = user.earnings;
+                    this.employeeName = user.fullName;
                 }
             });
         }

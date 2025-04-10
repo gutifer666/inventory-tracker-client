@@ -19,7 +19,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DropdownModule } from 'primeng/dropdown';
-import { Product, ProductService } from '../services/product.service';
+import { Product, ProductService } from '../../../../share/services/product/product.service';
 import { Category, CategoryService } from '../../category/services/category.service';
 import { Supplier, SupplierService } from '../../supplier/services/supplier.service';
 

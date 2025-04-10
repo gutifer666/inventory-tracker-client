@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
+import { LoginService } from '../../../share/services/login/login.service';
 
 @Component({
     selector: 'app-admin-menu',
@@ -17,6 +18,8 @@ import { AppMenuitem } from './app.menuitem';
 })
 export class AppMenu {
     model: MenuItem[] = [];
+
+    constructor(private loginService: LoginService, private router: Router) {}
 
     ngOnInit() {
         this.model = [
@@ -38,9 +41,18 @@ export class AppMenu {
                 items: [
                     { label: 'Exportar PDF', icon: 'pi pi-fw pi-file-pdf', routerLink: ['/admin'] },
                     { label: 'Documentación', icon: 'pi pi-fw pi-file', routerLink: ['/admin/documentation'] },
-                    { label: 'Log Out', icon: 'pi pi-fw pi-sign-out', routerLink: ['/'] }
+                    {
+                        label: 'Log Out',
+                        icon: 'pi pi-fw pi-sign-out',
+                        command: () => this.logout()
+                    }
                 ]
             }
         ];
+    }
+
+    logout() {
+        this.loginService.logout();
+        this.router.navigate(['/']);
     }
 }

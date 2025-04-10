@@ -44,7 +44,7 @@ export class RecentSalesWidget implements OnInit {
     constructor(private transactionService: TransactionService) {}
 
     ngOnInit() {
-        this.transactionService.getTransactions().subscribe(transactions => {
+        this.transactionService.findAllTransactions().subscribe(transactions => {
             this.transactions = transactions.reverse();
         });
     }

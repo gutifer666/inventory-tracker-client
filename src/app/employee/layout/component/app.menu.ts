@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
 import { LoginService } from '../../../share/services/login/login.service';
@@ -30,8 +30,8 @@ export class AppMenu {
             {
                 label: 'Administrar',
                 items: [
-                    { label: 'Transacción', icon: 'pi pi-fw pi-user', routerLink: ['/employee'] },
-                    { label: 'Profile', icon: 'pi pi-fw pi-check-square', routerLink: ['/employee'] }
+                    { label: 'Nueva Transacción', icon: 'pi pi-fw pi-shopping-cart', routerLink: ['/employee/transaction'] },
+                    { label: 'Perfil', icon: 'pi pi-fw pi-user', routerLink: ['/employee'] }
                 ]
             },
             {
@@ -39,7 +39,11 @@ export class AppMenu {
                 items: [
                     { label: 'Imprimir Factura', icon: 'pi pi-fw pi-print', routerLink: ['/employee'] },
                     { label: 'Documentación', icon: 'pi pi-fw pi-file', routerLink: ['/employee/documentation'] },
-                    { label: 'Log Out', icon: 'pi pi-fw pi-sign-out', command: () => this.logout() }
+                    {
+                        label: 'Log Out',
+                        icon: 'pi pi-fw pi-sign-out',
+                        command: () => this.logout()
+                    }
                 ]
             },
         ];

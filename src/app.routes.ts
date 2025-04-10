@@ -11,9 +11,11 @@ import { Notfound } from './app/share/pages/notfound/notfound';
 import { UserCrud } from './app/admin/pages/user/views/user-crud';
 import { CategoryCrud } from './app/admin/pages/category/views/category-crud';
 import { SupplierCrud } from './app/admin/pages/supplier/views/supplier-crud';
+import { TransactionForm } from './app/employee/pages/transaction/views/transaction-form';
 
 export const appRoutes: Routes = [
     { path: '', component: Login },
+    { path: 'login', component: Login },
 
     {
         path: 'admin',
@@ -32,6 +34,7 @@ export const appRoutes: Routes = [
         component: AppEmployeeLayout,
         children: [
             { path: '', component: EmployeeDashboard },
+            { path: 'transaction', component: TransactionForm },
             { path: 'documentation', component: Documentation }
         ]
     },

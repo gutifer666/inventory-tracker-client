@@ -1,14 +1,12 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { delay, tap } from 'rxjs/operators';
 
-export interface LoggedUser {
+export interface CurrentUser {
   id: number;
   username: string;
   fullName: string;
-  roles: string;
-  sales: number;
-  earnings: number;
+  role: string;
 }
 
 const mockUsers = [
@@ -23,11 +21,11 @@ const mockUsers = [
   },
   {
     id: 2,
-    earnings: 2155,
+    earnings: 0,
     full_name: 'Empleado de Prueba',
     password: '$2a$10$TW9wmcAMesXeH1naGswppOMcSA70FkdDs3oH9e7I8BPujPwEXwaE6',
     roles: 'ROLE_EMPLOYEE',
-    sales: 12,
+    sales: 0,
     username: 'empleado_prueba'
   },
   {
@@ -38,6 +36,15 @@ const mockUsers = [
     roles: 'ROLE_CUSTOMER',
     sales: 0,
     username: 'cliente_prueba'
+  },
+  {
+    id: 4,
+    earnings: 0,
+    full_name: 'Empleado de Prueba 2',
+    password: '$2a$10$TW9wmcAMesXeH1naGswppOMcSA70FkdDs3oH9e7I8BPujPwEXwaE6',
+    roles: 'ROLE_EMPLOYEE',
+    sales: 0,
+    username: 'empleado_prueba2'
   }
 ];
 
@@ -45,14 +52,18 @@ const mockUsers = [
   providedIn: 'root'
 })
 export class LoginService {
-  private currentUserSubject = new BehaviorSubject<LoggedUser | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
+  private currentUser: CurrentUser | null = null;
 
   constructor() {
-    // Comprobar si hay un usuario guardado en localStorage al iniciar
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      this.currentUserSubject.next(JSON.parse(savedUser));
+    // Intentar recuperar el usuario del localStorage al iniciar
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      try {
+        this.currentUser = JSON.parse(storedUser);
+      } catch (e) {
+        console.error('Error parsing stored user:', e);
+        localStorage.removeItem('currentUser');
+      }
     }
   }
 
@@ -69,34 +80,39 @@ export class LoginService {
         role = 'CUSTOMER';
       }
 
-      // Crear objeto de usuario logueado
-      const loggedUser: LoggedUser = {
+      // Guardar el usuario actual
+      this.currentUser = {
         id: user.id,
         username: user.username,
         fullName: user.full_name,
-        roles: user.roles,
-        sales: user.sales,
-        earnings: user.earnings
+        role: role
       };
 
-      // Guardar en localStorage y en el BehaviorSubject
-      localStorage.setItem('currentUser', JSON.stringify(loggedUser));
-      this.currentUserSubject.next(loggedUser);
+      // Guardar en localStorage para persistencia
+      localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
 
-      return of({ role }).pipe(delay(500)); // simulate network delay
+      return of({ role }).pipe(
+        delay(500), // simulate network delay
+        tap(() => console.log('Usuario logueado:', this.currentUser))
+      );
     } else {
       return throwError(() => new Error('Invalid credentials')).pipe(delay(500));
     }
   }
 
-  // Obtener el usuario actual
-  getCurrentUser(): LoggedUser | null {
-    return this.currentUserSubject.value;
+  /**
+   * Obtiene el usuario actualmente logueado
+   * @returns El usuario actual o null si no hay ningún usuario logueado
+   */
+  getCurrentUser(): CurrentUser | null {
+    return this.currentUser;
   }
 
-  // Cerrar sesión
+  /**
+   * Cierra la sesión del usuario actual
+   */
   logout(): void {
+    this.currentUser = null;
     localStorage.removeItem('currentUser');
-    this.currentUserSubject.next(null);
   }
 }
