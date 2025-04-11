@@ -13,6 +13,7 @@ import { CategoryCrud } from './app/admin/pages/category/views/category-crud';
 import { SupplierCrud } from './app/admin/pages/supplier/views/supplier-crud';
 import { TransactionForm } from './app/employee/pages/transaction/views/transaction-form';
 import { EditProfile } from './app/employee/pages/edit_profile/views/edit-profile';
+import { PrintInvoice } from './app/employee/pages/print_invoice/views/print-invoice';
 
 export const appRoutes: Routes = [
     { path: '', component: Login },
@@ -37,6 +38,7 @@ export const appRoutes: Routes = [
             { path: '', component: EmployeeDashboard },
             { path: 'transaction', component: TransactionForm },
             { path: 'edit-profile', component: EditProfile },
+            { path: 'print-invoice', component: PrintInvoice },
             { path: 'documentation', component: Documentation }
         ]
     },

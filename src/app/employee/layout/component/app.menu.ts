@@ -37,7 +37,7 @@ export class AppMenu {
             {
                 label: 'Acciones',
                 items: [
-                    { label: 'Imprimir Factura', icon: 'pi pi-fw pi-print', routerLink: ['/employee'] },
+                    { label: 'Imprimir Factura', icon: 'pi pi-fw pi-print', routerLink: ['/employee/print-invoice'] },
                     { label: 'Documentación', icon: 'pi pi-fw pi-file', routerLink: ['/employee/documentation'] },
                     {
                         label: 'Log Out',
