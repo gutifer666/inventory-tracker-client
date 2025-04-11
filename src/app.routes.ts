@@ -12,6 +12,7 @@ import { UserCrud } from './app/admin/pages/user/views/user-crud';
 import { CategoryCrud } from './app/admin/pages/category/views/category-crud';
 import { SupplierCrud } from './app/admin/pages/supplier/views/supplier-crud';
 import { TransactionForm } from './app/employee/pages/transaction/views/transaction-form';
+import { EditProfile } from './app/employee/pages/edit_profile/views/edit-profile';
 
 export const appRoutes: Routes = [
     { path: '', component: Login },
@@ -35,6 +36,7 @@ export const appRoutes: Routes = [
         children: [
             { path: '', component: EmployeeDashboard },
             { path: 'transaction', component: TransactionForm },
+            { path: 'edit-profile', component: EditProfile },
             { path: 'documentation', component: Documentation }
         ]
     },

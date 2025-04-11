@@ -31,7 +31,7 @@ export class AppMenu {
                 label: 'Administrar',
                 items: [
                     { label: 'Nueva Transacción', icon: 'pi pi-fw pi-shopping-cart', routerLink: ['/employee/transaction'] },
-                    { label: 'Perfil', icon: 'pi pi-fw pi-user', routerLink: ['/employee'] }
+                    { label: 'Editar Perfil', icon: 'pi pi-fw pi-user', routerLink: ['/employee/edit-profile'] }
                 ]
             },
             {
