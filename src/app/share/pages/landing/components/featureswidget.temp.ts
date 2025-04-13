@@ -128,7 +128,7 @@ import { CommonModule } from '@angular/common';
                     <div class="text-gray-900 mb-2 text-3xl font-semibold">Antonio Moreno</div>
                     <span class="text-gray-600 text-2xl">Distribuciones Malagueñas S.L.</span>
                     <p class="text-gray-900 sm:line-height-2 md:line-height-4 text-2xl mt-6" style="max-width: 800px">
-                        "Inventory Tracker ha transformado completamente la gestión de nuestro almacén en el Polígono Guadalhorce. Ahora controlamos nuestro stock en tiempo real y hemos reducido los errores de inventario en un 95%. Es una herramienta imprescindible para cualquier negocio mediano que quiera optimizar su gestión."
+                        "Inventory Tracker ha transformado completamente la gestión de nuestro almacén en el Polígono Guadalhorce. Ahora controlamos nuestro stock en tiempo real y hemos reducido los errores de inventario en un 95%. Es una herramienta imprescindible para cualquier negocio malagueño que quiera optimizar su gestión."
                     </p>
                     <div class="flex items-center justify-center bg-blue-100 rounded-full p-2 mt-6 w-16 h-16">
                         <span class="text-blue-800 font-bold text-xl">DM</span>
