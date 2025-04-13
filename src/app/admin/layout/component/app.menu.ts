@@ -39,7 +39,7 @@ export class AppMenu {
             {
                 label: 'Acciones',
                 items: [
-                    { label: 'Exportar PDF', icon: 'pi pi-fw pi-file-pdf', routerLink: ['/admin'] },
+                    { label: 'Exportar PDF', icon: 'pi pi-fw pi-file-pdf', routerLink: ['/admin/pdf'] },
                     { label: 'Documentación', icon: 'pi pi-fw pi-file', routerLink: ['/admin/documentation'] },
                     {
                         label: 'Log Out',

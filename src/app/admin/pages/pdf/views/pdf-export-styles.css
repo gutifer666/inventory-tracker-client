@@ -1,0 +1,69 @@
+/* PDF Export Styles */
+.pdf-container {
+    padding: 20px;
+    background-color: white;
+}
+
+.pdf-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.pdf-header h2 {
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.pdf-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Table Styles */
+.pdf-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.pdf-table th {
+    background-color: #f4f4f4;
+    padding: 8px;
+    text-align: left;
+    border: 1px solid #ddd;
+    font-weight: bold;
+}
+
+.pdf-table td {
+    padding: 8px;
+    border: 1px solid #ddd;
+}
+
+.pdf-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.pdf-table .total-row {
+    font-weight: bold;
+    background-color: #f0f0f0;
+}
+
+/* Print Styles */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    
+    .pdf-container, .pdf-container * {
+        visibility: visible;
+    }
+    
+    .pdf-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+}

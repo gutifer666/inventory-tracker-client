@@ -14,6 +14,7 @@ import { SupplierCrud } from './app/admin/pages/supplier/views/supplier-crud';
 import { TransactionForm } from './app/employee/pages/transaction/views/transaction-form';
 import { EditProfile } from './app/employee/pages/edit_profile/views/edit-profile';
 import { PrintInvoice } from './app/employee/pages/print_invoice/views/print-invoice';
+import { PdfExport } from './app/admin/pages/pdf/views/pdf-export';
 
 export const appRoutes: Routes = [
     { path: '', component: Login },
@@ -28,6 +29,7 @@ export const appRoutes: Routes = [
             { path: 'user', component: UserCrud },
             { path: 'category', component: CategoryCrud },
             { path: 'supplier', component: SupplierCrud },
+            { path: 'pdf', component: PdfExport },
             { path: 'documentation', component: Documentation }
         ]
     },
