@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './app/share/guards/auth.guard';
 import { AppAdminLayout } from './app/admin/layout/component/app.admin-layout';
 import { AdminDashboard } from './app/admin/pages/dashboard/admin-dashboard';
 import { AppEmployeeLayout } from './app/employee/layout/component/app.employee-layout';
@@ -23,6 +24,8 @@ export const appRoutes: Routes = [
     {
         path: 'admin',
         component: AppAdminLayout,
+        canActivate: [authGuard],
+        data: { role: 'ADMIN' },
         children: [
             { path: '', component: AdminDashboard },
             { path: 'product', component: ProductCrud },
@@ -36,6 +39,8 @@ export const appRoutes: Routes = [
     {
         path: 'employee',
         component: AppEmployeeLayout,
+        canActivate: [authGuard],
+        data: { role: 'EMPLOYEE' },
         children: [
             { path: '', component: EmployeeDashboard },
             { path: 'transaction', component: TransactionForm },

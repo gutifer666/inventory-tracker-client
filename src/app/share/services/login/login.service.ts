@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
-import { delay, tap } from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 
 export interface CurrentUser {
   id: number;
@@ -9,44 +10,21 @@ export interface CurrentUser {
   role: string;
 }
 
-const mockUsers = [
-  {
-    id: 1,
-    earnings: 0,
-    full_name: 'Administrador de Prueba',
-    password: '$2a$10$TW9wmcAMesXeH1naGswppOMcSA70FkdDs3oH9e7I8BPujPwEXwaE6',
-    roles: 'ROLE_ADMIN',
-    sales: 0,
-    username: 'administrador_prueba'
-  },
-  {
-    id: 2,
-    earnings: 0,
-    full_name: 'Empleado de Prueba',
-    password: '$2a$10$TW9wmcAMesXeH1naGswppOMcSA70FkdDs3oH9e7I8BPujPwEXwaE6',
-    roles: 'ROLE_EMPLOYEE',
-    sales: 0,
-    username: 'empleado_prueba'
-  },
-  {
-    id: 3,
-    earnings: 0,
-    full_name: 'Cliente de Prueba',
-    password: '$2a$10$TW9wmcAMesXeH1naGswppOMcSA70FkdDs3oH9e7I8BPujPwEXwaE6',
-    roles: 'ROLE_CUSTOMER',
-    sales: 0,
-    username: 'cliente_prueba'
-  },
-  {
-    id: 4,
-    earnings: 0,
-    full_name: 'Empleado de Prueba 2',
-    password: '$2a$10$TW9wmcAMesXeH1naGswppOMcSA70FkdDs3oH9e7I8BPujPwEXwaE6',
-    roles: 'ROLE_EMPLOYEE',
-    sales: 0,
-    username: 'empleado_prueba2'
-  }
-];
+// Interfaz para la solicitud de autenticación
+export interface AuthRequest {
+  userName: string;
+  password: string;
+}
+
+// Interfaz parra la respuesta de autenticación
+export interface AuthResponse {
+  id: number;
+  username: string;
+  fullName: string;
+  roles: string;
+  sales: number;
+  earnings: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -54,7 +32,9 @@ const mockUsers = [
 export class LoginService {
   private currentUser: CurrentUser | null = null;
 
-  constructor() {
+  private apiUrl = 'http://localhost:8080/api';
+
+  constructor(private http: HttpClient) {
     // Intentar recuperar el usuario del localStorage al iniciar
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
@@ -67,37 +47,48 @@ export class LoginService {
     }
   }
 
-  login(credentials: { userName: string; password: string }): Observable<{ role: string }> {
-    // For simplicity, assume any password is valid if the username exists.
-    const user = mockUsers.find(u => u.username === credentials.userName);
-    if (user) {
-      let role = '';
-      if (user.roles === 'ROLE_ADMIN') {
-        role = 'ADMIN';
-      } else if (user.roles === 'ROLE_EMPLOYEE') {
-        role = 'EMPLOYEE';
-      } else {
-        role = 'CUSTOMER';
-      }
+  /**
+   * Autentica un usuario contra el backend
+   * @param credentials Credenciales del usuario (nombre y contraseña)
+   * @returns Observable con el rol del usuario autenticado
+   */
+  login(credentials: AuthRequest): Observable<{ role: string }> {
+    // Use the complete API URL including the /api prefix
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, credentials).pipe(
+      map(response => {
+        // Determine the role
+        let role = '';
+        if (response.roles === 'ROLE_ADMIN') {
+          role = 'ADMIN';
+        } else if (response.roles === 'ROLE_EMPLOYEE') {
+          role = 'EMPLOYEE';
+        } else {
+          role = 'CUSTOMER';
+        }
 
-      // Guardar el usuario actual
-      this.currentUser = {
-        id: user.id,
-        username: user.username,
-        fullName: user.full_name,
-        role: role
-      };
+        // Save the current user
+        this.currentUser = {
+          id: response.id,
+          username: response.username,
+          fullName: response.fullName,
+          role: role
+        };
 
-      // Guardar en localStorage para persistencia
-      localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+        // Save to localStorage for persistence
+        localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
 
-      return of({ role }).pipe(
-        delay(500), // simulate network delay
-        tap(() => console.log('Usuario logueado:', this.currentUser))
-      );
-    } else {
-      return throwError(() => new Error('Invalid credentials')).pipe(delay(500));
-    }
+        return { role };
+      }),
+      tap(() => console.log('Usuario logueado:', this.currentUser)),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error durante el login:', error);
+        // More specific error message based on the error status
+        const errorMessage = error.status === 401 ?
+          'Credenciales inválidas' :
+          'Error en el servidor. Por favor, intente más tarde';
+        return throwError(() => new Error(errorMessage));
+      })
+    );
   }
 
   /**

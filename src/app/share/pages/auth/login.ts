@@ -7,7 +7,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 
-import { LoginService } from '../../services/login/login.service';
+import { AuthService } from '../../services/auth/auth.service';
 import { Router } from '@angular/router';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
 
@@ -84,22 +84,24 @@ export class Login {
     password: string = '';
     checked: boolean = false;
 
-    constructor(private loginService: LoginService, private router: Router) { }
+    constructor(private authService: AuthService, private router: Router) { }
 
     login() {
-        const credentials = { userName: this.userName, password: this.password };
-        this.loginService.login(credentials).subscribe(
+        const credentials = { username: this.userName, password: this.password };
+        this.authService.login(credentials).subscribe(
             response => {
                 if (response.role === 'ADMIN') {
                     this.router.navigate(['admin']);
                 } else if (response.role === 'EMPLOYEE') {
                     this.router.navigate(['employee']);
                 } else {
-                    // ...handle other roles...
+                    // Redirigir a la página de cliente o mostrar mensaje
+                    console.log('Rol no soportado:', response.role);
                 }
             },
             error => {
-                // ...handle error...
+                console.error('Error de autenticación:', error);
+                // Aquí se podría mostrar un mensaje de error al usuario
             }
         );
     }
