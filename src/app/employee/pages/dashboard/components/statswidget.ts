@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserService, User } from '../../../../share/services/user/user.service';
+import { UserService} from '../../../../share/services/user/user.service';
 import { LoginService } from '../../../../share/services/login/login.service';
 
 @Component({

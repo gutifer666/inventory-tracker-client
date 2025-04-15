@@ -1,15 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-
-export interface User {
-  id: number;
-  username: string;
-  password: string;
-  roles: string;
-  fullName: string;
-  sales: number;
-  earnings: number;
-}
+import { User } from '../../interfaces/user.interface';
 
 @Injectable({
   providedIn: 'root'

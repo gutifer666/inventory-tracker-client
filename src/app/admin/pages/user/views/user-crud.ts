@@ -18,7 +18,8 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { User, UserService } from '../../../../share/services/user/user.service';
+import { UserService } from '../../../../share/services/user/user.service';
+import { User } from '../../../../share/interfaces/user.interface';
 
 interface Column {
     field: string;
