@@ -1,88 +1,135 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { User } from '../../interfaces/user.interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
+  private baseUrl = 'http://localhost:8080/api';
+  private apiUrl = `${this.baseUrl}/users`;
 
-private users: User[] = [
-  {
-    id: 1,
-    username: "administrador_prueba",
-    password: "$2a$10$TW9wmcAMesXeH1naGswppOMcSA70FkdDs3oH9e7I8BPujPwEXwaE6",
-    roles: "ROLE_ADMIN",
-    fullName: "Administrador de Prueba",
-    sales: 0,
-    earnings: 0
-  },
-  {
-    id: 2,
-    username: "empleado_prueba",
-    password: "$2a$10$TW9wmcAMesXeH1naGswppOMcSA70FkdDs3oH9e7I8BPujPwEXwaE6",
-    roles: "ROLE_EMPLOYEE",
-    fullName: "Empleado de Prueba",
-    sales: 12,
-    earnings: 2155
-  },
-  {
-    id: 3,
-    username: "cliente_prueba",
-    password: "$2a$10$TW9wmcAMesXeH1naGswppOMcSA70FkdDs3oH9e7I8BPujPwEXwaE6",
-    roles: "ROLE_CUSTOMER",
-    fullName: "Cliente de Prueba",
-    sales: 0,
-    earnings: 0
-  },
-  {
-    id: 4,
-    username: "empleado_prueba2",
-    password: "$2a$10$TW9wmcAMesXeH1naGswppOMcSA70FkdDs3oH9e7I8BPujPwEXwaE6",
-    roles: "ROLE_EMPLOYEE",
-    fullName: "Empleado de Prueba 2",
-    sales: 25,
-    earnings: 4300
-  }
-];
+  constructor(private http: HttpClient) { }
 
-  constructor() { }
-
-  // Get all users
+  /**
+   * Get all users
+   * @returns Observable with an array of users
+   */
   getUsers(): Observable<User[]> {
-    return of(this.users);
+    console.log('UserService - Fetching all users');
+    return this.http.get<User[]>(this.apiUrl).pipe(
+      map(users => {
+        console.log('UserService - Successfully fetched users:', users.length);
+        return users;
+      }),
+      catchError(error => {
+        console.error('UserService - Error fetching users:', error);
+        return this.handleError(error);
+      })
+    );
   }
 
-  // Get a user by id
+  /**
+   * Get a user by id
+   * @param id User ID
+   * @returns Observable with the user or undefined
+   */
   getUserById(id: number): Observable<User | undefined> {
-    const user = this.users.find(p => p.id === id);
-    return of(user);
+    console.log(`UserService - Fetching user with ID: ${id}`);
+    return this.http.get<User>(`${this.apiUrl}/${id}`).pipe(
+      map(user => {
+        console.log('UserService - Successfully fetched user:', user);
+        return user;
+      }),
+      catchError(error => {
+        console.error(`UserService - Error fetching user with ID ${id}:`, error);
+        return this.handleError(error);
+      })
+    );
   }
 
-  // Add a new user
+  /**
+   * Add a new user
+   * @param user User to add
+   * @returns Observable with the created user
+   */
   addUser(user: User): Observable<User> {
-    user.id = this.users.length ? Math.max(...this.users.map(p => p.id)) + 1 : 1;
-    this.users.push(user);
-    return of(user);
+    console.log('UserService - Creating new user:', user);
+    return this.http.post<User>(this.apiUrl, user).pipe(
+      map(newUser => {
+        console.log('UserService - Successfully created user:', newUser);
+        return newUser;
+      }),
+      catchError(error => {
+        console.error('UserService - Error creating user:', error);
+        return this.handleError(error);
+      })
+    );
   }
 
-  // Update an existing user
+  /**
+   * Update an existing user
+   * @param user User to update
+   * @returns Observable with the updated user or undefined
+   */
   updateUser(user: User): Observable<User | undefined> {
-    const index = this.users.findIndex(p => p.id === user.id);
-    if (index !== -1) {
-      this.users[index] = user;
-      return of(user);
-    }
-    return of(undefined);
+    console.log(`UserService - Updating user with ID: ${user.id}`, user);
+    return this.http.put<User>(`${this.apiUrl}/${user.id}`, user).pipe(
+      map(updatedUser => {
+        console.log('UserService - Successfully updated user:', updatedUser);
+        return updatedUser;
+      }),
+      catchError(error => {
+        console.error(`UserService - Error updating user with ID ${user.id}:`, error);
+        return this.handleError(error);
+      })
+    );
   }
 
-  // Delete a user by id
+  /**
+   * Delete a user by id
+   * @param id User ID to delete
+   * @returns Observable with boolean indicating success
+   */
   deleteUser(id: number): Observable<boolean> {
-    const index = this.users.findIndex(p => p.id === id);
-    if (index !== -1) {
-      this.users.splice(index, 1);
-      return of(true);
+    console.log(`UserService - Deleting user with ID: ${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      map(() => {
+        console.log(`UserService - Successfully deleted user with ID: ${id}`);
+        return true;
+      }),
+      catchError(error => {
+        console.error(`UserService - Error deleting user with ID ${id}:`, error);
+        return this.handleError(error);
+      })
+    );
+  }
+
+  /**
+   * Handle HTTP errors
+   * @param error The HTTP error response
+   * @returns An observable with the error message
+   */
+  private handleError(error: HttpErrorResponse) {
+    let errorMessage = 'An unknown error occurred';
+
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // Server-side error
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+
+      // Add more specific error handling for authentication issues
+      if (error.status === 401 || error.status === 403) {
+        errorMessage = 'Authentication error: Please log in again';
+        console.error('UserService - Authentication error:', error.status, error.message);
+      }
     }
-    return of(false);
+
+    console.error('UserService - Error details:', errorMessage);
+    return throwError(() => new Error(errorMessage));
   }
 }
