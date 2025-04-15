@@ -87,13 +87,13 @@ import html2canvas from 'html2canvas';
                         <ng-template pTemplate="body" let-transaction>
                             <tr>
                                 <td>{{ transaction.id }}</td>
-                                <td>{{ transaction.employee_name }}</td>
-                                <td>{{ transaction.client_name }}</td>
-                                <td>{{ transaction.product_name }}</td>
-                                <td>{{ transaction.product_code }}</td>
+                                <td>{{ transaction.employeeName }}</td>
+                                <td>{{ transaction.clientName }}</td>
+                                <td>{{ transaction.productName }}</td>
+                                <td>{{ transaction.productCode }}</td>
                                 <td>{{ transaction.quantity }}</td>
-                                <td>€{{ transaction.transaction_price }}</td>
-                                <td>{{ transaction.created_at | date: 'dd/MM/yyyy' }}</td>
+                                <td>€{{ transaction.transactionPrice }}</td>
+                                <td>{{ transaction.createdAt | date: 'dd/MM/yyyy' }}</td>
                             </tr>
                         </ng-template>
                         <ng-template pTemplate="footer">
@@ -138,13 +138,13 @@ export class PdfExport implements OnInit {
         this.transactionService.findAllTransactions().subscribe(transactions => {
             // Sort transactions by date (newest first) and take the 10 most recent
             this.recentTransactions = transactions
-                .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                 .slice(0, 10);
         });
     }
 
     calculateTotal(): number {
-        return this.recentTransactions.reduce((sum, transaction) => sum + transaction.transaction_price, 0);
+        return this.recentTransactions.reduce((sum, transaction) => sum + transaction.transactionPrice, 0);
     }
 
     exportPDF() {

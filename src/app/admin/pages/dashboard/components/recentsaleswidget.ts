@@ -11,7 +11,7 @@ import { Transaction, TransactionService } from '../../../../share/services/tran
     imports: [CommonModule, TableModule, ButtonModule, RippleModule],
     template: `<div class="card !mb-8 text-center">
         <div class="font-semibold text-xl mb-4">Ventas Recientes</div>
-        <p-table [value]="transactions" [paginator]="true" [rows]="3" responsiveLayout="scroll">
+        <p-table [value]="transactions" [paginator]="true" [rows]="3" responsiveLayout="scroll" styleClass="p-datatable-sm p-datatable-striped">
             <ng-template pTemplate="header">
                 <tr>
                     <th class="text-center">Empleado</th>
@@ -19,19 +19,26 @@ import { Transaction, TransactionService } from '../../../../share/services/tran
                     <th class="text-center">Código</th>
                     <th class="text-center">Nombre</th>
                     <th class="text-center">Precio</th>
-                    <th class="text-center">Cantidad</th>
+                    <th class="text-center bg-blue-50 dark:bg-blue-900">Cantidad</th>
                     <th class="text-center">Fecha</th>
                 </tr>
             </ng-template>
             <ng-template pTemplate="body" let-transaction>
                 <tr>
-                    <td class="text-center">{{ transaction.employee_name }}</td>
-                    <td class="text-center">{{ transaction.client_name }}</td>
-                    <td class="text-center">{{ transaction.product_code }}</td>
-                    <td class="text-center">{{ transaction.product_name }}</td>
-                    <td class="text-center">{{ transaction.transaction_price | currency: 'EUR' }}</td>
-                    <td class="text-center">{{ transaction.quantity }}</td>
-                    <td class="text-center">{{ transaction.created_at | date: 'dd/MM/yyyy HH:mm' }}</td>
+                    <td class="text-center">{{ transaction.employeeName }}</td>
+                    <td class="text-center">{{ transaction.clientName }}</td>
+                    <td class="text-center">{{ transaction.productCode }}</td>
+                    <td class="text-center">{{ transaction.productName }}</td>
+                    <td class="text-center">{{ transaction.transactionPrice | currency: 'EUR' }}</td>
+                    <td class="text-center font-bold bg-blue-50 dark:bg-blue-900">{{ transaction.quantity }} unid.</td>
+                    <td class="text-center">{{ transaction.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="7" class="text-center p-4">
+                        No hay transacciones disponibles.
+                    </td>
                 </tr>
             </ng-template>
         </p-table>
@@ -44,8 +51,17 @@ export class RecentSalesWidget implements OnInit {
     constructor(private transactionService: TransactionService) {}
 
     ngOnInit() {
-        this.transactionService.findAllTransactions().subscribe(transactions => {
-            this.transactions = transactions.reverse();
-        });
+        this.transactionService.findAllTransactions().subscribe(
+            transactions => {
+                // Ordenar por fecha (más recientes primero) y limitar a 10 transacciones
+                this.transactions = transactions
+                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                    .slice(0, 10);
+                console.log('RecentSalesWidget - Loaded transactions:', this.transactions.length);
+            },
+            error => {
+                console.error('RecentSalesWidget - Error loading transactions:', error);
+            }
+        );
     }
 }

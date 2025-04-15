@@ -6,13 +6,13 @@ import { catchError, map } from 'rxjs/operators';
 // Define the Transaction interface
 export interface Transaction {
     id: number;
-    employee_name: string;
-    client_name: string;
-    product_code: string;
-    product_name: string;
+    employeeName: string;
+    clientName: string;
+    productCode: string;
+    productName: string;
     quantity: number;
-    transaction_price: number;
-    created_at: string;
+    transactionPrice: number;
+    createdAt: string;
 }
 
 // Define the Transaction DTO interface

@@ -27,13 +27,13 @@ describe('TransactionService', () => {
     const mockTransactions: Transaction[] = [
       {
         id: 1,
-        employee_name: 'Test Employee',
-        client_name: 'Test Client',
-        product_code: 'TEST001',
-        product_name: 'Test Product',
+        employeeName: 'Test Employee',
+        clientName: 'Test Client',
+        productCode: 'TEST001',
+        productName: 'Test Product',
         quantity: 2,
-        transaction_price: 100,
-        created_at: '2023-01-01 10:00:00'
+        transactionPrice: 100,
+        createdAt: '2023-01-01 10:00:00'
       }
     ];
 
@@ -57,13 +57,13 @@ describe('TransactionService', () => {
 
     const mockResponse: Transaction = {
       id: 1,
-      employee_name: 'Test Employee',
-      client_name: 'Test Client',
-      product_code: 'TEST001',
-      product_name: 'Test Product',
+      employeeName: 'Test Employee',
+      clientName: 'Test Client',
+      productCode: 'TEST001',
+      productName: 'Test Product',
       quantity: 2,
-      transaction_price: 100,
-      created_at: '2023-01-01 10:00:00'
+      transactionPrice: 100,
+      createdAt: '2023-01-01 10:00:00'
     };
 
     service.createTransaction(mockTransactionDTO).subscribe(transaction => {
