@@ -196,26 +196,47 @@ export class TransactionForm implements OnInit {
         this.submitted = true;
 
         if (this.canSubmit()) {
-            this.transactionService.createTransaction(this.transaction);
+            this.transactionService.createTransaction(this.transaction).subscribe(
+                (response) => {
+                    console.log('Transaction created successfully:', response);
 
-            this.messageService.add({
-                severity: 'success',
-                summary: 'Transacción Exitosa',
-                detail: 'La transacción se ha registrado correctamente',
-                life: 3000
-            });
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Transacción Exitosa',
+                        detail: 'La transacción se ha registrado correctamente',
+                        life: 3000
+                    });
 
-            // Resetear el formulario después de 1 segundo
-            setTimeout(() => {
-                this.transaction = {
-                    userId: this.transaction.userId,
-                    clientName: '',
-                    productId: 0,
-                    quantity: 1
-                };
-                this.selectedProduct = null;
-                this.submitted = false;
-            }, 1000);
+                    // Update product stock if needed
+                    if (this.selectedProduct) {
+                        this.selectedProduct.quantity -= this.transaction.quantity;
+                    }
+
+                    // Resetear el formulario después de 1 segundo
+                    setTimeout(() => {
+                        this.transaction = {
+                            userId: this.transaction.userId,
+                            clientName: '',
+                            productId: 0,
+                            quantity: 1
+                        };
+                        this.selectedProduct = null;
+                        this.submitted = false;
+                    }, 1000);
+                },
+                (error) => {
+                    console.error('Error creating transaction:', error);
+
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'No se pudo registrar la transacción. ' + error.message,
+                        life: 5000
+                    });
+
+                    this.submitted = false;
+                }
+            );
         }
     }
 
