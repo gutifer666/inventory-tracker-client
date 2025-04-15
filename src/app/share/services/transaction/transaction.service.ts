@@ -2,26 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-
-// Define the Transaction interface
-export interface Transaction {
-    id: number;
-    employeeName: string;
-    clientName: string;
-    productCode: string;
-    productName: string;
-    quantity: number;
-    transactionPrice: number;
-    createdAt: string;
-}
-
-// Define the Transaction DTO interface
-export interface TransactionDTO {
-    userId: number;
-    clientName: string;
-    productId: number;
-    quantity: number;
-}
+import { Transaction, TransactionDTO } from '../../interfaces/transaction.interface';
 
 @Injectable({
     providedIn: 'root'

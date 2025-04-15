@@ -3,7 +3,8 @@ import { RippleModule } from 'primeng/ripple';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
-import { Transaction, TransactionService } from '../../../../share/services/transaction/transaction.service';
+import { TransactionService } from '../../../../share/services/transaction/transaction.service';
+import { Transaction } from '../../../../share/interfaces/transaction.interface';
 
 @Component({
     standalone: true,

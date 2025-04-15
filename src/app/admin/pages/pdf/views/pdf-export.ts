@@ -14,7 +14,10 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 
 // Services
-import { TransactionService, Transaction } from '../../../../share/services/transaction/transaction.service';
+import { TransactionService} from '../../../../share/services/transaction/transaction.service';
+
+// Interfaces
+import { Transaction } from '../../../../share/interfaces/transaction.interface';
 
 // PDF Libraries
 import jsPDF from 'jspdf';

@@ -15,9 +15,12 @@ import { InputIconModule } from 'primeng/inputicon';
 import { MessageService } from 'primeng/api';
 
 // Services
-import { TransactionService, Transaction } from '../../../../share/services/transaction/transaction.service';
+import { TransactionService} from '../../../../share/services/transaction/transaction.service';
 import { UserService } from '../../../../share/services/user/user.service';
 import { LoginService } from '../../../../share/services/login/login.service';
+
+// Interfaces
+import { Transaction } from '../../../../share/interfaces/transaction.interface';
 
 @Component({
     selector: 'app-print-invoice',

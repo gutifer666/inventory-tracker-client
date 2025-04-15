@@ -13,8 +13,11 @@ import { MessageService } from 'primeng/api';
 
 // Services
 import { ProductService, Product } from '../../../../share/services/product/product.service';
-import { TransactionService, TransactionDTO } from '../../../../share/services/transaction/transaction.service';
+import { TransactionService} from '../../../../share/services/transaction/transaction.service';
 import { LoginService } from '../../../../share/services/login/login.service';
+
+// Interfaces
+import { TransactionDTO } from '../../../../share/interfaces/transaction.interface';
 
 @Component({
     selector: 'app-transaction-form',
