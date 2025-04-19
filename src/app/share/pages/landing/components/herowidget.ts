@@ -15,7 +15,7 @@ import { RouterLink } from '@angular/router';
             <div class="mx-6 md:mx-20 mt-0 md:mt-6">
                 <h1 class="text-6xl font-bold text-gray-900 leading-tight"><span class="font-light block">Gestión de Inventario</span>Simple y Eficiente</h1>
                 <p class="font-normal text-2xl leading-normal md:mt-4 text-gray-700">Inventory Tracker te permite controlar tu inventario, gestionar transacciones y generar informes de manera rápida y sencilla.</p>
-                <button pButton pRipple [rounded]="true" type="button" label="Comenzar Ahora" class="!text-xl mt-8 !px-4" routerLink="/"></button>
+                <button pButton pRipple [rounded]="true" type="button" label="Comenzar Ahora" class="!text-xl mt-8 !px-4" routerLink="/login"></button>
             </div>
             <div class="flex justify-center md:justify-end">
                 <img src="https://primefaces.org/cdn/templates/sakai/landing/screen-1.png" alt="Hero Image" class="w-9/12 md:w-auto" />

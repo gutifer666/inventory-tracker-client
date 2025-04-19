@@ -53,6 +53,6 @@ export class AppMenu {
 
     logout() {
         this.loginService.logout();
-        this.router.navigate(['/']);
+        this.router.navigate(['/login']);
     }
 }

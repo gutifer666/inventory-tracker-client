@@ -18,7 +18,7 @@ import { PrintInvoice } from './app/employee/pages/print_invoice/views/print-inv
 import { PdfExport } from './app/admin/pages/pdf/views/pdf-export';
 
 export const appRoutes: Routes = [
-    { path: '', component: Login },
+    { path: '', component: Landing },
     { path: 'login', component: Login },
 
     {

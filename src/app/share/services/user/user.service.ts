@@ -57,6 +57,8 @@ export class UserService {
    */
   addUser(user: User): Observable<User> {
     console.log('UserService - Creating new user:', user);
+    // Añadir más logs para depuración
+    console.log('UserService - API URL:', this.apiUrl);
     return this.http.post<User>(this.apiUrl, user).pipe(
       map(newUser => {
         console.log('UserService - Successfully created user:', newUser);
@@ -64,6 +66,18 @@ export class UserService {
       }),
       catchError(error => {
         console.error('UserService - Error creating user:', error);
+        console.error('UserService - Error status:', error.status);
+        console.error('UserService - Error message:', error.message);
+        if (error.error) {
+          console.error('UserService - Error details:', error.error);
+        }
+
+        // Handle authentication errors specifically for user creation
+        if (error.status === 401 || error.status === 403) {
+          console.error('UserService - Authentication error when creating user. This might be a permissions issue.');
+          return throwError(() => new Error('Permission denied: You may not have the required privileges to create users.'));
+        }
+
         return this.handleError(error);
       })
     );

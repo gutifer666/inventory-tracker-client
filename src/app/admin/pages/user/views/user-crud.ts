@@ -150,15 +150,15 @@ interface ExportColumn {
                         <span class="block font-bold mb-4">Rol</span>
                         <div class="grid grid-cols-12 gap-4">
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="rol1" name="rol" value="ROLE_ADMIN" [(ngModel)]="user.roles" />
+                                <p-radiobutton id="rol1" name="rol" value="ADMIN" [(ngModel)]="selectedRole" (ngModelChange)="updateUserRole($event)" />
                                 <label for="rol1">Administrador</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="rol2" name="rol" value="ROLE_EMPLOYEE" [(ngModel)]="user.roles" />
+                                <p-radiobutton id="rol2" name="rol" value="EMPLOYEE" [(ngModel)]="selectedRole" (ngModelChange)="updateUserRole($event)" />
                                 <label for="rol2">Empleado</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="rol3" name="rol" value="ROLE_CUSTOMER" [(ngModel)]="user.roles" />
+                                <p-radiobutton id="rol3" name="rol" value="CUSTOMER" [(ngModel)]="selectedRole" (ngModelChange)="updateUserRole($event)" />
                                 <label for="rol3">Cliente</label>
                             </div>
                         </div>
@@ -210,12 +210,25 @@ export class UserCrud implements OnInit {
     }
 
     ngOnInit() {
-        this.loadDemoData();
+        this.loadUsers();
     }
 
-    loadDemoData() {
-        this.userService.getUsers().subscribe((data) => {
-            this.users.set(data);
+    loadUsers() {
+        console.log('UserCrud - Loading users');
+        this.userService.getUsers().subscribe({
+            next: (data) => {
+                console.log('UserCrud - Users loaded successfully:', data);
+                this.users.set(data);
+            },
+            error: (error) => {
+                console.error('UserCrud - Error loading users:', error);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Error loading users',
+                    life: 3000
+                });
+            }
         });
 
         this.cols = [
@@ -260,7 +273,7 @@ export class UserCrud implements OnInit {
                 this.selectedUsers?.forEach((prod) => {
                     this.userService.deleteUser(prod.id).subscribe();
                 });
-                this.loadDemoData();
+                this.loadUsers();
                 this.selectedUsers = null;
                 this.messageService.add({
                     severity: 'success',
@@ -285,7 +298,7 @@ export class UserCrud implements OnInit {
             accept: () => {
                 this.userService.deleteUser(user.id).subscribe((success) => {
                     if (success) {
-                        this.loadDemoData();
+                        this.loadUsers();
                         this.messageService.add({
                             severity: 'success',
                             summary: 'Successful',
@@ -311,25 +324,66 @@ export class UserCrud implements OnInit {
         this.submitted = true;
         let _users = this.users();
         if (this.user.username?.trim()) {
+            // Asegurarse de que el rol tenga el prefijo ROLE_
+            if (!this.user.roles.startsWith('ROLE_')) {
+                this.user.roles = `ROLE_${this.user.roles}`;
+            }
+
+            console.log('UserCrud - Saving user:', this.user);
+            console.log('UserCrud - User ID:', this.user.id);
+            console.log('UserCrud - User roles:', this.user.roles);
+
             if (this.user.id) {
-                this.userService.updateUser(this.user).subscribe((updatedUser) => {
-                    this.loadDemoData();
-                    this.messageService.add({
-                        severity: 'success',
-                        summary: 'Successful',
-                        detail: 'Product Updated',
-                        life: 3000
-                    });
+                console.log('UserCrud - Updating existing user');
+                this.userService.updateUser(this.user).subscribe({
+                    next: (updatedUser) => {
+                        console.log('UserCrud - User updated successfully:', updatedUser);
+                        this.loadUsers();
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Successful',
+                            detail: 'User Updated',
+                            life: 3000
+                        });
+                    },
+                    error: (error) => {
+                        console.error('UserCrud - Error updating user:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: 'Error updating user',
+                            life: 3000
+                        });
+                    }
                 });
             } else {
-                this.userService.addUser(this.user).subscribe((newProduct) => {
-                    this.loadDemoData();
-                    this.messageService.add({
-                        severity: 'success',
-                        summary: 'Successful',
-                        detail: 'User Created',
-                        life: 3000
-                    });
+                console.log('UserCrud - Creating new user');
+                this.userService.addUser(this.user).subscribe({
+                    next: (newUser) => {
+                        console.log('UserCrud - User created successfully:', newUser);
+                        this.loadUsers();
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Successful',
+                            detail: 'User Created',
+                            life: 3000
+                        });
+                    },
+                    error: (error) => {
+                        console.error('UserCrud - Error creating user:', error);
+
+                        // Check if it's a permissions error
+                        const errorDetail = error.message.includes('Permission denied') ?
+                            'Permission denied: You may not have the required privileges to create users.' :
+                            'Error creating user';
+
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: errorDetail,
+                            life: 5000
+                        });
+                    }
                 });
             }
             this.userDialog = false;
