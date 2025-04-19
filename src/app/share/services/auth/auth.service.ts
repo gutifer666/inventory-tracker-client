@@ -30,7 +30,7 @@ export interface AuthResponse {
 export class AuthService {
   private currentUserSubject: BehaviorSubject<CurrentUser | null>;
   public currentUser: Observable<CurrentUser | null>;
-  
+
   private apiUrl = 'http://localhost:8080/api';
   private tokenKey = 'jwt_token';
   private userKey = 'current_user';
@@ -62,9 +62,11 @@ export class AuthService {
   login(credentials: AuthRequest): Observable<{ role: string }> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, credentials).pipe(
       map(response => {
+          // Añadir log para verificar el token
+          console.log('Token received:', response.token);
         // Guardar el token JWT
         localStorage.setItem(this.tokenKey, response.token);
-        
+
         // Determinar el rol
         let role = '';
         if (response.roles === 'ROLE_ADMIN') {
@@ -107,10 +109,10 @@ export class AuthService {
     // Eliminar token y usuario del localStorage
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
-    
+
     // Actualizar el BehaviorSubject
     this.currentUserSubject.next(null);
-    
+
     // Redirigir al login
     this.router.navigate(['/login']);
   }
@@ -135,11 +137,11 @@ export class AuthService {
   isTokenExpired(): boolean {
     const token = this.getToken();
     if (!token) return true;
-    
+
     try {
       // Decodificar el token (formato: header.payload.signature)
       const payload = JSON.parse(atob(token.split('.')[1]));
-      
+
       // Verificar si el token ha expirado
       const expirationDate = new Date(payload.exp * 1000);
       return expirationDate <= new Date();

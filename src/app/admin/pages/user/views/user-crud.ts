@@ -150,15 +150,15 @@ interface ExportColumn {
                         <span class="block font-bold mb-4">Rol</span>
                         <div class="grid grid-cols-12 gap-4">
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="rol1" name="rol" value="ADMIN" [(ngModel)]="selectedRole" (ngModelChange)="updateUserRole($event)" />
+                                <p-radiobutton id="rol1" name="rol" value="ROLE_ADMIN" [(ngModel)]="user.roles" />
                                 <label for="rol1">Administrador</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="rol2" name="rol" value="EMPLOYEE" [(ngModel)]="selectedRole" (ngModelChange)="updateUserRole($event)" />
+                                <p-radiobutton id="rol2" name="rol" value="ROLE_EMPLOYEE" [(ngModel)]="user.roles" />
                                 <label for="rol2">Empleado</label>
                             </div>
                             <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="rol3" name="rol" value="CUSTOMER" [(ngModel)]="selectedRole" (ngModelChange)="updateUserRole($event)" />
+                                <p-radiobutton id="rol3" name="rol" value="ROLE_CUSTOMER" [(ngModel)]="user.roles" />
                                 <label for="rol3">Cliente</label>
                             </div>
                         </div>
