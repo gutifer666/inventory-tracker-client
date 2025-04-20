@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { User } from '../../interfaces/user.interface';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable({
   providedIn: 'root'
@@ -51,6 +52,24 @@ export class UserService {
   }
 
   /**
+   * Hash a password using BCrypt
+   * @param password Password to hash
+   * @returns BCrypt hashed password
+   */
+  private hashPassword(password: string): string {
+    try {
+      // Generate a salt with cost factor 10 (default)
+      // In production, you might want to increase this for better security
+      const salt = bcrypt.genSaltSync(10);
+      // Hash the password with the generated salt
+      return bcrypt.hashSync(password, salt);
+    } catch (e) {
+      console.error('Error hashing password with BCrypt:', e);
+      return password; // Return original password if hashing fails
+    }
+  }
+
+  /**
    * Add a new user
    * @param user User to add
    * @returns Observable with the created user
@@ -59,12 +78,18 @@ export class UserService {
       // Crear una copia del usuario para no modificar el original
       const userToSend = {
           username: user.username,
-          password: user.password,  // El backend debería encargarse del hashing
+          // Hash the password with BCrypt before sending to server
+          // This matches the BCrypt hashing used on the backend
+          password: this.hashPassword(user.password),
           roles: user.roles,
           fullName: user.fullName
       };
 
-      console.log('UserService - Creating new user:', userToSend);
+      console.log('UserService - Creating new user:', {
+          ...userToSend,
+          password: '***HASHED***' // Don't log the actual password
+      });
+
       return this.http.post<User>(this.apiUrl, userToSend).pipe(
           map(newUser => {
               console.log('UserService - Successfully created user:', newUser);
@@ -84,8 +109,19 @@ export class UserService {
    * @returns Observable with the updated user or undefined
    */
   updateUser(user: User): Observable<User | undefined> {
-    console.log(`UserService - Updating user with ID: ${user.id}`, user);
-    return this.http.put<User>(`${this.apiUrl}/${user.id}`, user).pipe(
+    // Create a copy of the user to avoid modifying the original
+    const userToUpdate = {
+      ...user,
+      // Hash the password with BCrypt before sending to server
+      password: this.hashPassword(user.password)
+    };
+
+    console.log(`UserService - Updating user with ID: ${user.id}`, {
+      ...userToUpdate,
+      password: '***HASHED***' // Don't log the actual password
+    });
+
+    return this.http.put<User>(`${this.apiUrl}/${user.id}`, userToUpdate).pipe(
       map(updatedUser => {
         console.log('UserService - Successfully updated user:', updatedUser);
         return updatedUser;

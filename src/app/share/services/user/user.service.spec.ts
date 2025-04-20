@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { UserService } from './user.service';
 import { User } from '../../interfaces/user.interface';
+import * as bcrypt from 'bcryptjs';
 
 describe('UserService', () => {
   let service: UserService;
@@ -77,7 +78,7 @@ describe('UserService', () => {
     req.flush(mockUser);
   });
 
-  it('should add a new user', () => {
+  it('should add a new user with BCrypt hashed password', () => {
     const newUser: User = {
       id: 0, // ID will be assigned by the server
       username: 'newuser',
@@ -99,11 +100,23 @@ describe('UserService', () => {
 
     const req = httpMock.expectOne('http://localhost:8080/api/users');
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual(newUser);
+
+    // Check that the password is hashed with BCrypt
+    // BCrypt hashes start with '$2a$', '$2b$', or '$2y$'
+    expect(req.request.body.password).toMatch(/^\$2[aby]\$/);
+
+    // Verify that the hash is valid and matches the original password
+    expect(bcrypt.compareSync('password123', req.request.body.password)).toBeTrue();
+
+    // Check other fields remain the same
+    expect(req.request.body.username).toBe(newUser.username);
+    expect(req.request.body.roles).toBe(newUser.roles);
+    expect(req.request.body.fullName).toBe(newUser.fullName);
+
     req.flush(mockResponse);
   });
 
-  it('should update an existing user', () => {
+  it('should update an existing user with BCrypt hashed password', () => {
     const userToUpdate: User = {
       id: 1,
       username: 'admin',
@@ -120,7 +133,20 @@ describe('UserService', () => {
 
     const req = httpMock.expectOne('http://localhost:8080/api/users/1');
     expect(req.request.method).toBe('PUT');
-    expect(req.request.body).toEqual(userToUpdate);
+
+    // Check that the password is hashed with BCrypt
+    // BCrypt hashes start with '$2a$', '$2b$', or '$2y$'
+    expect(req.request.body.password).toMatch(/^\$2[aby]\$/);
+
+    // Verify that the hash is valid and matches the original password
+    expect(bcrypt.compareSync('hashedpassword', req.request.body.password)).toBeTrue();
+
+    // Check other fields remain the same
+    expect(req.request.body.id).toBe(userToUpdate.id);
+    expect(req.request.body.username).toBe(userToUpdate.username);
+    expect(req.request.body.roles).toBe(userToUpdate.roles);
+    expect(req.request.body.fullName).toBe(userToUpdate.fullName);
+
     req.flush(userToUpdate);
   });
 
