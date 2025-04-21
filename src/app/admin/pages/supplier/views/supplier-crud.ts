@@ -148,8 +148,19 @@ export class SupplierCrud implements OnInit {
     }
 
     loadSuppliers() {
-        this.supplierService.getSuppliers().subscribe((data) => {
-            this.suppliers.set(data);
+        this.supplierService.getSuppliers().subscribe({
+            next: (data) => {
+                this.suppliers.set(data);
+            },
+            error: (error) => {
+                console.error('Error loading suppliers:', error);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: error.message || 'Error loading suppliers',
+                    life: 5000
+                });
+            }
         });
     }
 
@@ -173,17 +184,41 @@ export class SupplierCrud implements OnInit {
             header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.selectedSuppliers.forEach(supplier => {
-                    this.supplierService.deleteSupplier(supplier.id).subscribe();
+                // Create an array of promises for deleting all selected suppliers
+                const deletePromises = this.selectedSuppliers.map(supplier =>
+                    new Promise<boolean>((resolve) => {
+                        this.supplierService.deleteSupplier(supplier.id).subscribe({
+                            next: (success) => resolve(success),
+                            error: (error) => {
+                                console.error(`Error deleting supplier ${supplier.id}:`, error);
+                                this.messageService.add({
+                                    severity: 'error',
+                                    summary: 'Error',
+                                    detail: `Error al eliminar el proveedor ${supplier.name}: ${error.message || 'Error desconocido'}`,
+                                    life: 5000
+                                });
+                                resolve(false);
+                            }
+                        });
+                    })
+                );
+
+                // Wait for all deletions to complete
+                Promise.all(deletePromises).then(results => {
+                    const successCount = results.filter(result => result).length;
+
+                    if (successCount > 0) {
+                        this.loadSuppliers();
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Exitoso',
+                            detail: `${successCount} proveedor(es) eliminado(s)`,
+                            life: 3000
+                        });
+                    }
+
+                    this.selectedSuppliers = [];
                 });
-                this.loadSuppliers();
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Exitoso',
-                    detail: 'Proveedores eliminados',
-                    life: 3000
-                });
-                this.selectedSuppliers = [];
             }
         });
     }
@@ -199,18 +234,29 @@ export class SupplierCrud implements OnInit {
             header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.supplierService.deleteSupplier(supplier.id).subscribe((success) => {
-                    if (success) {
-                        this.loadSuppliers();
+                this.supplierService.deleteSupplier(supplier.id).subscribe({
+                    next: (success) => {
+                        if (success) {
+                            this.loadSuppliers();
+                            this.messageService.add({
+                                severity: 'success',
+                                summary: 'Exitoso',
+                                detail: 'Proveedor eliminado',
+                                life: 3000
+                            });
+                        }
+                        this.supplier = { id: 0, name: '' };
+                    },
+                    error: (error) => {
+                        console.error('Error deleting supplier:', error);
                         this.messageService.add({
-                            severity: 'success',
-                            summary: 'Exitoso',
-                            detail: 'Proveedor eliminado',
-                            life: 3000
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: error.message || 'Error al eliminar el proveedor',
+                            life: 5000
                         });
                     }
                 });
-                this.supplier = { id: 0, name: '' };
             }
         });
     }
@@ -225,28 +271,52 @@ export class SupplierCrud implements OnInit {
 
         if (this.supplier.name?.trim()) {
             if (this.supplier.id) {
-                this.supplierService.updateSupplier(this.supplier).subscribe((updatedSupplier) => {
-                    this.loadSuppliers();
-                    this.messageService.add({
-                        severity: 'success',
-                        summary: 'Exitoso',
-                        detail: 'Proveedor actualizado',
-                        life: 3000
-                    });
+                this.supplierService.updateSupplier(this.supplier).subscribe({
+                    next: (updatedSupplier) => {
+                        this.loadSuppliers();
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Exitoso',
+                            detail: 'Proveedor actualizado',
+                            life: 3000
+                        });
+                        this.supplierDialog = false;
+                        this.supplier = { id: 0, name: '' };
+                    },
+                    error: (error) => {
+                        console.error('Error updating supplier:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: error.message || 'Error al actualizar el proveedor',
+                            life: 5000
+                        });
+                    }
                 });
             } else {
-                this.supplierService.addSupplier(this.supplier).subscribe((newSupplier) => {
-                    this.loadSuppliers();
-                    this.messageService.add({
-                        severity: 'success',
-                        summary: 'Exitoso',
-                        detail: 'Proveedor creado',
-                        life: 3000
-                    });
+                this.supplierService.addSupplier(this.supplier).subscribe({
+                    next: (newSupplier) => {
+                        this.loadSuppliers();
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Exitoso',
+                            detail: 'Proveedor creado',
+                            life: 3000
+                        });
+                        this.supplierDialog = false;
+                        this.supplier = { id: 0, name: '' };
+                    },
+                    error: (error) => {
+                        console.error('Error creating supplier:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: error.message || 'Error al crear el proveedor',
+                            life: 5000
+                        });
+                    }
                 });
             }
-            this.supplierDialog = false;
-            this.supplier = { id: 0, name: '' };
         }
     }
 

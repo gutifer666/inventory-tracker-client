@@ -161,8 +161,19 @@ export class CategoryCrud implements OnInit {
     }
 
     loadCategories() {
-        this.categoryService.getCategories().subscribe((data) => {
-            this.categories.set(data);
+        this.categoryService.getCategories().subscribe({
+            next: (data) => {
+                this.categories.set(data);
+            },
+            error: (error) => {
+                console.error('Error loading categories:', error);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: error.message || 'Error loading categories',
+                    life: 5000
+                });
+            }
         });
     }
 
@@ -187,17 +198,41 @@ export class CategoryCrud implements OnInit {
             header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.selectedCategories.forEach(category => {
-                    this.categoryService.deleteCategory(category.id).subscribe();
+                // Create an array of promises for deleting all selected categories
+                const deletePromises = this.selectedCategories.map(category =>
+                    new Promise<boolean>((resolve) => {
+                        this.categoryService.deleteCategory(category.id).subscribe({
+                            next: (success) => resolve(success),
+                            error: (error) => {
+                                console.error(`Error deleting category ${category.id}:`, error);
+                                this.messageService.add({
+                                    severity: 'error',
+                                    summary: 'Error',
+                                    detail: `Error al eliminar la categoría ${category.name}: ${error.message || 'Error desconocido'}`,
+                                    life: 5000
+                                });
+                                resolve(false);
+                            }
+                        });
+                    })
+                );
+
+                // Wait for all deletions to complete
+                Promise.all(deletePromises).then(results => {
+                    const successCount = results.filter(result => result).length;
+
+                    if (successCount > 0) {
+                        this.loadCategories();
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Exitoso',
+                            detail: `${successCount} categoría(s) eliminada(s)`,
+                            life: 3000
+                        });
+                    }
+
+                    this.selectedCategories = [];
                 });
-                this.loadCategories();
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Exitoso',
-                    detail: 'Categorías eliminadas',
-                    life: 3000
-                });
-                this.selectedCategories = [];
             }
         });
     }
@@ -213,18 +248,29 @@ export class CategoryCrud implements OnInit {
             header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.categoryService.deleteCategory(category.id).subscribe((success) => {
-                    if (success) {
-                        this.loadCategories();
+                this.categoryService.deleteCategory(category.id).subscribe({
+                    next: (success) => {
+                        if (success) {
+                            this.loadCategories();
+                            this.messageService.add({
+                                severity: 'success',
+                                summary: 'Exitoso',
+                                detail: 'Categoría eliminada',
+                                life: 3000
+                            });
+                        }
+                        this.category = { id: 0, name: '', description: '' };
+                    },
+                    error: (error) => {
+                        console.error('Error deleting category:', error);
                         this.messageService.add({
-                            severity: 'success',
-                            summary: 'Exitoso',
-                            detail: 'Categoría eliminada',
-                            life: 3000
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: error.message || 'Error al eliminar la categoría',
+                            life: 5000
                         });
                     }
                 });
-                this.category = { id: 0, name: '', description: '' };
             }
         });
     }
@@ -239,28 +285,52 @@ export class CategoryCrud implements OnInit {
 
         if (this.category.name?.trim()) {
             if (this.category.id) {
-                this.categoryService.updateCategory(this.category).subscribe((updatedCategory) => {
-                    this.loadCategories();
-                    this.messageService.add({
-                        severity: 'success',
-                        summary: 'Exitoso',
-                        detail: 'Categoría actualizada',
-                        life: 3000
-                    });
+                this.categoryService.updateCategory(this.category).subscribe({
+                    next: (updatedCategory) => {
+                        this.loadCategories();
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Exitoso',
+                            detail: 'Categoría actualizada',
+                            life: 3000
+                        });
+                        this.categoryDialog = false;
+                        this.category = { id: 0, name: '', description: '' };
+                    },
+                    error: (error) => {
+                        console.error('Error updating category:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: error.message || 'Error al actualizar la categoría',
+                            life: 5000
+                        });
+                    }
                 });
             } else {
-                this.categoryService.addCategory(this.category).subscribe((newCategory) => {
-                    this.loadCategories();
-                    this.messageService.add({
-                        severity: 'success',
-                        summary: 'Exitoso',
-                        detail: 'Categoría creada',
-                        life: 3000
-                    });
+                this.categoryService.addCategory(this.category).subscribe({
+                    next: (newCategory) => {
+                        this.loadCategories();
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Exitoso',
+                            detail: 'Categoría creada',
+                            life: 3000
+                        });
+                        this.categoryDialog = false;
+                        this.category = { id: 0, name: '', description: '' };
+                    },
+                    error: (error) => {
+                        console.error('Error creating category:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: error.message || 'Error al crear la categoría',
+                            life: 5000
+                        });
+                    }
                 });
             }
-            this.categoryDialog = false;
-            this.category = { id: 0, name: '', description: '' };
         }
     }
 
