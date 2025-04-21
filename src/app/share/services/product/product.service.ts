@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 export interface Product {
   id: number;
@@ -17,65 +19,148 @@ export interface Product {
   providedIn: 'root'
 })
 export class ProductService {
+  private baseUrl = 'http://localhost:8080/api';
+  private apiUrl = `${this.baseUrl}/products`;
 
-  private products: Product[] = [
-    { id: 1, code: "GEN001", cost_price: 300, description: "Bicicleta BH de montaña", name: "Bicicleta", quantity: 20, retail_price: 500, category_id: 1, supplier_id: 1 },
-    { id: 2, code: "ELEC001", cost_price: 200, description: "Teléfono inteligente de última generación", name: "Smartphone", quantity: 10, retail_price: 300, category_id: 2, supplier_id: 2 },
-    { id: 3, code: "ROPA001", cost_price: 30, description: "Camiseta de algodón 100%", name: "Camiseta", quantity: 50, retail_price: 50, category_id: 3, supplier_id: 3 },
-    { id: 4, code: "ALIM001", cost_price: 1, description: "Leche entera pasteurizada", name: "Leche", quantity: 100, retail_price: 2, category_id: 4, supplier_id: 1 },
-    { id: 5, code: "GEN002", cost_price: 20, description: "Silla de madera para comedor", name: "Silla", quantity: 30, retail_price: 30, category_id: 1, supplier_id: 2 },
-    { id: 6, code: "ELEC002", cost_price: 100, description: "Tablet de 10 pulgadas", name: "Tablet", quantity: 15, retail_price: 150, category_id: 2, supplier_id: 3 },
-    { id: 7, code: "ROPA002", cost_price: 40, description: "Pantalón vaquero de hombre", name: "Pantalón", quantity: 40, retail_price: 60, category_id: 3, supplier_id: 1 },
-    { id: 8, code: "ALIM002", cost_price: 0.5, description: "Pan de trigo", name: "Pan", quantity: 200, retail_price: 1, category_id: 4, supplier_id: 2 },
-    { id: 9, code: "GEN003", cost_price: 50, description: "Mesa de centro de cristal", name: "Mesa", quantity: 25, retail_price: 80, category_id: 1, supplier_id: 3 },
-    { id: 10, code: "ELEC003", cost_price: 80, description: "Reloj inteligente con monitor de actividad", name: "Smartwatch", quantity: 20, retail_price: 120, category_id: 2, supplier_id: 1 },
-    { id: 11, code: "ROPA003", cost_price: 60, description: "Vestido de fiesta para mujer", name: "Vestido", quantity: 35, retail_price: 100, category_id: 3, supplier_id: 2 },
-    { id: 12, code: "ALIM003", cost_price: 1.5, description: "Refresco de cola", name: "Refresco", quantity: 150, retail_price: 2.5, category_id: 4, supplier_id: 3 }
-  ];
+  constructor(private http: HttpClient) { }
 
-  constructor() { }
-
-  // Get all products
+  /**
+   * Get all products
+   * @returns Observable with an array of products
+   */
   getProducts(): Observable<Product[]> {
-    return of(this.products);
+    console.log('ProductService - Fetching all products');
+    return this.http.get<Product[]>(this.apiUrl).pipe(
+      map(products => {
+        console.log('ProductService - Successfully fetched products:', products.length);
+        return products;
+      }),
+      catchError(error => {
+        console.error('ProductService - Error fetching products:', error);
+        return this.handleError(error);
+      })
+    );
   }
 
-  // Get a product by id
+  /**
+   * Get a product by id
+   * @param id Product ID
+   * @returns Observable with the product or undefined
+   */
   getProductById(id: number): Observable<Product | undefined> {
-    const product = this.products.find(p => p.id === id);
-    return of(product);
+    console.log(`ProductService - Fetching product with ID: ${id}`);
+    return this.http.get<Product>(`${this.apiUrl}/${id}`).pipe(
+      map(product => {
+        console.log('ProductService - Successfully fetched product:', product);
+        return product;
+      }),
+      catchError(error => {
+        console.error(`ProductService - Error fetching product with ID ${id}:`, error);
+        return this.handleError(error);
+      })
+    );
   }
 
-  // Get products by category id
+  /**
+   * Get products by category id
+   * @param category_id Category ID
+   * @returns Observable with an array of products
+   */
   getProductsByCategory(category_id: number): Observable<Product[]> {
-    const filtered = this.products.filter(p => p.category_id === category_id);
-    return of(filtered);
+    console.log(`ProductService - Fetching products with category ID: ${category_id}`);
+    // Assuming the API supports filtering by category_id as a query parameter
+    return this.http.get<Product[]>(`${this.apiUrl}?category_id=${category_id}`).pipe(
+      map(products => {
+        console.log(`ProductService - Successfully fetched products for category ${category_id}:`, products.length);
+        return products;
+      }),
+      catchError(error => {
+        console.error(`ProductService - Error fetching products for category ${category_id}:`, error);
+        return this.handleError(error);
+      })
+    );
   }
 
-  // Add a new product
+  /**
+   * Add a new product
+   * @param product Product to add
+   * @returns Observable with the created product
+   */
   addProduct(product: Product): Observable<Product> {
-    product.id = this.products.length ? Math.max(...this.products.map(p => p.id)) + 1 : 1;
-    this.products.push(product);
-    return of(product);
+    console.log('ProductService - Creating new product:', product);
+    return this.http.post<Product>(this.apiUrl, product).pipe(
+      map(newProduct => {
+        console.log('ProductService - Successfully created product:', newProduct);
+        return newProduct;
+      }),
+      catchError(error => {
+        console.error('ProductService - Error creating product:', error);
+        return this.handleError(error);
+      })
+    );
   }
 
-  // Update an existing product
+  /**
+   * Update an existing product
+   * @param product Product to update
+   * @returns Observable with the updated product or undefined
+   */
   updateProduct(product: Product): Observable<Product | undefined> {
-    const index = this.products.findIndex(p => p.id === product.id);
-    if (index !== -1) {
-      this.products[index] = product;
-      return of(product);
-    }
-    return of(undefined);
+    console.log(`ProductService - Updating product with ID: ${product.id}`, product);
+    return this.http.put<Product>(`${this.apiUrl}/${product.id}`, product).pipe(
+      map(updatedProduct => {
+        console.log(`ProductService - Successfully updated product with ID: ${product.id}`, updatedProduct);
+        return updatedProduct;
+      }),
+      catchError(error => {
+        console.error(`ProductService - Error updating product with ID ${product.id}:`, error);
+        return this.handleError(error);
+      })
+    );
   }
 
-  // Delete a product by id
+  /**
+   * Delete a product by id
+   * @param id Product ID to delete
+   * @returns Observable with boolean indicating success
+   */
   deleteProduct(id: number): Observable<boolean> {
-    const index = this.products.findIndex(p => p.id === id);
-    if (index !== -1) {
-      this.products.splice(index, 1);
-      return of(true);
+    console.log(`ProductService - Deleting product with ID: ${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      map(() => {
+        console.log(`ProductService - Successfully deleted product with ID: ${id}`);
+        return true;
+      }),
+      catchError(error => {
+        console.error(`ProductService - Error deleting product with ID ${id}:`, error);
+        return this.handleError(error);
+      })
+    );
+  }
+
+  /**
+   * Handle HTTP errors
+   * @param error The HTTP error response
+   * @returns An observable with the error message
+   */
+  private handleError(error: HttpErrorResponse) {
+    let errorMessage = 'An unknown error occurred';
+
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // Server-side error
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+
+      // Add more specific error handling for authentication issues
+      if (error.status === 401 || error.status === 403) {
+        errorMessage = 'Authentication error: Please log in again';
+        console.error('ProductService - Authentication error:', error.status, error.message);
+      }
     }
-    return of(false);
+
+    console.error('ProductService - Error details:', errorMessage);
+    return throwError(() => new Error(errorMessage));
   }
 }
