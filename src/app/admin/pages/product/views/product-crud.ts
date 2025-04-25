@@ -267,8 +267,14 @@ export class ProductCrud implements OnInit {
     }
 
     loadDemoData() {
-        this.productService.getProducts().subscribe((data) => {
-            this.products.set(data);
+        this.productService.getProducts().subscribe({
+            next: (data) => {
+                console.log('Productos cargados:', data);
+                this.products.set(data);
+            },
+            error: (error) => {
+                console.error('Error al cargar productos:', error);
+            }
         });
 
         this.loadCategoriesAndSuppliers();
@@ -294,13 +300,25 @@ export class ProductCrud implements OnInit {
 
     loadCategoriesAndSuppliers() {
         // Cargar categorías actualizadas
-        this.categoryService.getCategories().subscribe((data) => {
-            this.categories.set(data);
+        this.categoryService.getCategories().subscribe({
+            next: (data) => {
+                console.log('Categorías cargadas:', data);
+                this.categories.set(data);
+            },
+            error: (error) => {
+                console.error('Error al cargar categorías:', error);
+            }
         });
 
         // Cargar proveedores actualizados
-        this.supplierService.getSuppliers().subscribe((data) => {
-            this.suppliers.set(data);
+        this.supplierService.getSuppliers().subscribe({
+            next: (data) => {
+                console.log('Proveedores cargados:', data);
+                this.suppliers.set(data);
+            },
+            error: (error) => {
+                console.error('Error al cargar proveedores:', error);
+            }
         });
     }
 
@@ -419,11 +437,13 @@ export class ProductCrud implements OnInit {
     }
 
     getCategoryName(categoryId: number): string {
+        if (!categoryId) return 'No asignada';
         const category = this.categories().find(c => c.id === categoryId);
         return category ? category.name : 'No asignada';
     }
 
     getSupplierName(supplierId: number): string {
+        if (!supplierId) return 'No asignado';
         const supplier = this.suppliers().find(s => s.id === supplierId);
         return supplier ? supplier.name : 'No asignado';
     }
