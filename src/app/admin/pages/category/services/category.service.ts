@@ -93,43 +93,42 @@ export class CategoryService {
   addCategory(category: Category): Observable<Category> {
     console.log('CategoryService - Creating new category:', category);
 
-    // Check if user is authenticated
-    if (!this.authService.isAuthenticated()) {
-      console.error('CategoryService - User is not authenticated');
-      return throwError(() => new Error('User is not authenticated'));
-    }
-
-    // Check if token is expired
-    if (this.authService.isTokenExpired()) {
-      console.error('CategoryService - Token is expired');
-      this.authService.logout(); // Force logout if token is expired
-      return throwError(() => new Error('Authentication token has expired. Please log in again.'));
-    }
-
-    // Get the token and log it (for debugging)
+    // Log del token para verificar que es válido
     const token = this.authService.getToken();
-    console.log('CategoryService - Using token:', token ? 'Token exists' : 'No token');
+    console.log('CategoryService - Token being used:', token ? 'Valid token exists' : 'No token');
 
-    // Create headers with the token
+    // Log de la URL completa
+    console.log('CategoryService - POST URL:', this.apiUrl);
+
+    // Log del cuerpo de la solicitud
+    console.log('CategoryService - Request body:', JSON.stringify(category));
+
+    // Crear headers manualmente para asegurarnos de que se envían correctamente
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     });
 
-    // Log the user role
-    console.log('CategoryService - User role:', this.authService.getUserRole());
+    // Log de los headers
+    console.log('CategoryService - Request headers:', headers);
 
+    // Enviar la solicitud con los headers explícitos
     return this.http.post<Category>(this.apiUrl, category, { headers }).pipe(
       map(newCategory => {
         console.log('CategoryService - Successfully created category:', newCategory);
         return newCategory;
       }),
       catchError(error => {
-        console.error('CategoryService - Error creating category:', error);
-        // Add more specific error handling
-        if (error.status === 403) {
-          console.error('CategoryService - Permission denied. User role may not have access to create categories.');
+        // Log detallado del error
+        console.error('CategoryService - Error creating category. Status:', error.status);
+        console.error('CategoryService - Error details:', error);
+        console.error('CategoryService - Error response:', error.error);
+
+        // Si hay un mensaje específico del servidor, mostrarlo
+        if (error.error && typeof error.error === 'object' && error.error.message) {
+          console.error('CategoryService - Server message:', error.error.message);
         }
+
         return this.handleError(error);
       })
     );

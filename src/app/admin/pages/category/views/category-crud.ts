@@ -284,6 +284,9 @@ export class CategoryCrud implements OnInit {
         this.submitted = true;
 
         if (this.category.name?.trim()) {
+            // Log detallado del objeto category antes de enviarlo
+            console.log('CategoryCrud - Category object before saving:', JSON.stringify(this.category));
+
             if (this.category.id) {
                 this.categoryService.updateCategory(this.category).subscribe({
                     next: (updatedCategory) => {
@@ -308,7 +311,15 @@ export class CategoryCrud implements OnInit {
                     }
                 });
             } else {
-                this.categoryService.addCategory(this.category).subscribe({
+                // Crear un objeto limpio para enviar al backend
+                const categoryToCreate = {
+                    name: this.category.name.trim(),
+                    description: this.category.description?.trim() || ''
+                };
+
+                console.log('CategoryCrud - Clean category object to create:', categoryToCreate);
+
+                this.categoryService.addCategory(categoryToCreate as Category).subscribe({
                     next: (newCategory) => {
                         this.loadCategories();
                         this.messageService.add({
@@ -321,7 +332,7 @@ export class CategoryCrud implements OnInit {
                         this.category = { id: 0, name: '', description: '' };
                     },
                     error: (error) => {
-                        console.error('Error creating category:', error);
+                        console.error('CategoryCrud - Error creating category:', error);
                         this.messageService.add({
                             severity: 'error',
                             summary: 'Error',
