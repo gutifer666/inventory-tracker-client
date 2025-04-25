@@ -104,19 +104,20 @@ interface ExportColumn {
             </ng-template>
         </p-table>
 
-        <p-dialog [(visible)]="supplierDialog" [style]="{ width: '450px' }" header="Detalles del Proveedor" [modal]="true">
+        <p-dialog [(visible)]="supplierDialog" [style]="{ width: '450px' }" header="Detalles del Proveedor" [modal]="true" [closable]="false">
             <ng-template #content>
                 <div class="flex flex-col gap-6">
                     <div>
-                        <label for="name" class="block font-bold mb-3">Nombre</label>
-                        <input type="text" pInputText id="name" [(ngModel)]="supplier.name" required autofocus fluid />
-                        <small class="p-error" *ngIf="submitted && !supplier.name">El nombre es requerido.</small>
+                        <label for="name" class="block font-bold mb-3">Nombre <span class="text-red-500">*</span></label>
+                        <input type="text" pInputText id="name" [(ngModel)]="supplier.name" required autofocus fluid
+                               [ngClass]="{'ng-invalid ng-dirty': submitted && !supplier.name?.trim()}" />
+                        <small class="p-error" *ngIf="submitted && !supplier.name?.trim()">El nombre es requerido.</small>
                     </div>
                 </div>
             </ng-template>
             <ng-template #footer>
                 <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
-                <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text" (click)="saveSupplier()"></button>
+                <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text" [disabled]="submitted && !supplier.name?.trim()" (click)="saveSupplier()"></button>
             </ng-template>
         </p-dialog>
 
@@ -148,16 +149,18 @@ export class SupplierCrud implements OnInit {
     }
 
     loadSuppliers() {
+        // Show loading indicator or disable UI if needed
         this.supplierService.getSuppliers().subscribe({
             next: (data) => {
                 this.suppliers.set(data);
+                console.log('SupplierCrud - Successfully loaded suppliers:', data.length);
             },
             error: (error) => {
-                console.error('Error loading suppliers:', error);
+                console.error('SupplierCrud - Error loading suppliers:', error);
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Error',
-                    detail: error.message || 'Error loading suppliers',
+                    detail: error.message || 'Error al cargar los proveedores',
                     life: 5000
                 });
             }
@@ -184,20 +187,16 @@ export class SupplierCrud implements OnInit {
             header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
+                console.log(`SupplierCrud - Attempting to delete ${this.selectedSuppliers.length} suppliers`);
+
                 // Create an array of promises for deleting all selected suppliers
                 const deletePromises = this.selectedSuppliers.map(supplier =>
-                    new Promise<boolean>((resolve) => {
+                    new Promise<{success: boolean, name: string, error?: any}>((resolve) => {
                         this.supplierService.deleteSupplier(supplier.id).subscribe({
-                            next: (success) => resolve(success),
+                            next: (success) => resolve({success, name: supplier.name}),
                             error: (error) => {
-                                console.error(`Error deleting supplier ${supplier.id}:`, error);
-                                this.messageService.add({
-                                    severity: 'error',
-                                    summary: 'Error',
-                                    detail: `Error al eliminar el proveedor ${supplier.name}: ${error.message || 'Error desconocido'}`,
-                                    life: 5000
-                                });
-                                resolve(false);
+                                console.error(`SupplierCrud - Error deleting supplier ${supplier.id}:`, error);
+                                resolve({success: false, name: supplier.name, error});
                             }
                         });
                     })
@@ -205,7 +204,15 @@ export class SupplierCrud implements OnInit {
 
                 // Wait for all deletions to complete
                 Promise.all(deletePromises).then(results => {
-                    const successCount = results.filter(result => result).length;
+                    const successCount = results.filter(result => result.success).length;
+                    const failedCount = results.length - successCount;
+
+                    // Group errors by type for better reporting
+                    const failedItems = results.filter(result => !result.success);
+                    const conflictItems = failedItems.filter(item => item.error?.status === 409);
+                    const permissionItems = failedItems.filter(item => item.error?.status === 403);
+                    const otherErrors = failedItems.filter(item =>
+                        item.error?.status !== 409 && item.error?.status !== 403);
 
                     if (successCount > 0) {
                         this.loadSuppliers();
@@ -214,6 +221,34 @@ export class SupplierCrud implements OnInit {
                             summary: 'Exitoso',
                             detail: `${successCount} proveedor(es) eliminado(s)`,
                             life: 3000
+                        });
+                    }
+
+                    // Show specific error messages for different error types
+                    if (conflictItems.length > 0) {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: `${conflictItems.length} proveedor(es) no se pudieron eliminar porque están siendo utilizados por otros registros`,
+                            life: 5000
+                        });
+                    }
+
+                    if (permissionItems.length > 0) {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: 'No tiene permisos para eliminar algunos proveedores',
+                            life: 5000
+                        });
+                    }
+
+                    if (otherErrors.length > 0) {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: `${otherErrors.length} proveedor(es) no se pudieron eliminar debido a errores desconocidos`,
+                            life: 5000
                         });
                     }
 
@@ -234,6 +269,8 @@ export class SupplierCrud implements OnInit {
             header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
+                console.log(`SupplierCrud - Attempting to delete supplier with ID: ${supplier.id}`);
+
                 this.supplierService.deleteSupplier(supplier.id).subscribe({
                     next: (success) => {
                         if (success) {
@@ -244,15 +281,34 @@ export class SupplierCrud implements OnInit {
                                 detail: 'Proveedor eliminado',
                                 life: 3000
                             });
+                        } else {
+                            // Handle case where API returns success=false
+                            console.warn(`SupplierCrud - API returned false for delete operation on supplier ID: ${supplier.id}`);
+                            this.messageService.add({
+                                severity: 'warn',
+                                summary: 'Advertencia',
+                                detail: 'No se pudo eliminar el proveedor. Puede que esté siendo utilizado por otros registros.',
+                                life: 5000
+                            });
                         }
                         this.supplier = { id: 0, name: '' };
                     },
                     error: (error) => {
-                        console.error('Error deleting supplier:', error);
+                        console.error(`SupplierCrud - Error deleting supplier ID ${supplier.id}:`, error);
+
+                        // Check for specific error types
+                        let errorMessage = 'Error al eliminar el proveedor';
+
+                        if (error.status === 409) {
+                            errorMessage = 'No se puede eliminar el proveedor porque está siendo utilizado por productos u otros registros';
+                        } else if (error.status === 403) {
+                            errorMessage = 'No tiene permisos para eliminar proveedores';
+                        }
+
                         this.messageService.add({
                             severity: 'error',
                             summary: 'Error',
-                            detail: error.message || 'Error al eliminar el proveedor',
+                            detail: error.message || errorMessage,
                             life: 5000
                         });
                     }
@@ -270,6 +326,9 @@ export class SupplierCrud implements OnInit {
         this.submitted = true;
 
         if (this.supplier.name?.trim()) {
+            // Log detallado del objeto supplier antes de enviarlo
+            console.log('SupplierCrud - Supplier object before saving:', JSON.stringify(this.supplier));
+
             if (this.supplier.id) {
                 this.supplierService.updateSupplier(this.supplier).subscribe({
                     next: (updatedSupplier) => {
@@ -294,7 +353,14 @@ export class SupplierCrud implements OnInit {
                     }
                 });
             } else {
-                this.supplierService.addSupplier(this.supplier).subscribe({
+                // Crear un objeto limpio para enviar al backend
+                const supplierToCreate = {
+                    name: this.supplier.name.trim()
+                };
+
+                console.log('SupplierCrud - Clean supplier object to create:', supplierToCreate);
+
+                this.supplierService.addSupplier(supplierToCreate as Supplier).subscribe({
                     next: (newSupplier) => {
                         this.loadSuppliers();
                         this.messageService.add({
@@ -307,7 +373,7 @@ export class SupplierCrud implements OnInit {
                         this.supplier = { id: 0, name: '' };
                     },
                     error: (error) => {
-                        console.error('Error creating supplier:', error);
+                        console.error('SupplierCrud - Error creating supplier:', error);
                         this.messageService.add({
                             severity: 'error',
                             summary: 'Error',
