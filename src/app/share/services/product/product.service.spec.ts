@@ -34,7 +34,7 @@ describe('ProductService', () => {
         name: 'Bicicleta',
         quantity: 20,
         retail_price: 500,
-        category_id: 1,
+        categoryId: 1,
         supplier_id: 1
       },
       {
@@ -45,7 +45,7 @@ describe('ProductService', () => {
         name: 'Smartphone',
         quantity: 10,
         retail_price: 300,
-        category_id: 2,
+        categoryId: 2,
         supplier_id: 2
       }
     ];
@@ -69,7 +69,7 @@ describe('ProductService', () => {
       name: 'Bicicleta',
       quantity: 20,
       retail_price: 500,
-      category_id: 1,
+      categoryId: 1,
       supplier_id: 1
     };
 
@@ -92,7 +92,7 @@ describe('ProductService', () => {
         name: 'Bicicleta',
         quantity: 20,
         retail_price: 500,
-        category_id: 1,
+        categoryId: 1,
         supplier_id: 1
       }
     ];
@@ -116,7 +116,7 @@ describe('ProductService', () => {
       name: 'New Product',
       quantity: 10,
       retail_price: 150,
-      category_id: 1,
+      categoryId: 1,
       supplier_id: 1
     };
 
@@ -144,7 +144,7 @@ describe('ProductService', () => {
       name: 'Bicicleta',
       quantity: 20,
       retail_price: 550, // Updated price
-      category_id: 1,
+      categoryId: 1,
       supplier_id: 1
     };
 

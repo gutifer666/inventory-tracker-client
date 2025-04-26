@@ -97,7 +97,7 @@ import { TransactionDTO } from '../../../../share/interfaces/transaction.interfa
                         <!-- Precio -->
                         <div class="field col-span-1" *ngIf="selectedProduct">
                             <label class="block text-lg font-medium mb-2">Precio</label>
-                            <div class="text-xl font-bold">{{ selectedProduct.retail_price | currency:'EUR' }}</div>
+                            <div class="text-xl font-bold">{{ selectedProduct.retailPrice | currency:'EUR' }}</div>
                             <small class="text-gray-500">Precio unitario</small>
                         </div>
 
@@ -106,7 +106,7 @@ import { TransactionDTO } from '../../../../share/interfaces/transaction.interfa
                             <div class="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
                                 <div class="flex justify-between items-center">
                                     <span class="text-lg font-medium">Total:</span>
-                                    <span class="text-xl font-bold">{{ selectedProduct.retail_price * transaction.quantity | currency:'EUR' }}</span>
+                                    <span class="text-xl font-bold">{{ selectedProduct.retailPrice * transaction.quantity | currency:'EUR' }}</span>
                                 </div>
                             </div>
                         </div>

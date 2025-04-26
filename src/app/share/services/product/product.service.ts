@@ -6,13 +6,20 @@ import { catchError, map } from 'rxjs/operators';
 export interface Product {
   id: number;
   code: string;
-  cost_price: number;
-  description: string;
   name: string;
+  description: string;
+  category?: {
+    id: number;
+    name: string;
+    description?: string;
+  };
+  supplier?: {
+    id: number;
+    name: string;
+  };
+  costPrice: number;
+  retailPrice: number;
   quantity: number;
-  retail_price: number;
-  category_id: number;
-  supplier_id: number;
 }
 
 @Injectable({

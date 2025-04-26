@@ -62,7 +62,9 @@ interface ExportColumn {
         <p-toolbar styleClass="mb-6">
             <ng-template #start>
                 <p-button label="Nuevo" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-                <p-button severity="secondary" label="Borrar" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+                <p-button severity="secondary" label="Borrar" icon="pi pi-trash" outlined
+                          (onClick)="deleteSelectedProducts()"
+                          [disabled]="!selectedProducts || !selectedProducts.length" />
             </ng-template>
 
             <ng-template #end>
@@ -134,20 +136,23 @@ interface ExportColumn {
                     </td>
                     <td style="min-width: 12rem">{{ product.code }}</td>
                     <td style="min-width: 16rem">{{ product.name }}</td>
-                    <td>{{ getCategoryName(product.category_id) }}</td>
-                    <td>{{ getSupplierName(product.supplier_id) }}</td>
-                    <td>{{ product.cost_price | currency: 'EUR' }}</td>
-                    <td>{{ product.retail_price | currency: 'EUR' }}</td>
-                    <td>{{ product.quantity}}</td>
+                    <td>{{ product.category?.name || 'No asignada' }}</td>
+                    <td>{{ product.supplier?.name || 'No asignado' }}</td>
+                    <td>{{ product.costPrice | currency: 'EUR' }}</td>
+                    <td>{{ product.retailPrice | currency: 'EUR' }}</td>
+                    <td>{{ product.quantity }}</td>
                     <td>
-                        <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(product)" />
-                        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(product)" />
+                        <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true"
+                                  (click)="editProduct(product)" />
+                        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
+                                  (click)="deleteProduct(product)" />
                     </td>
                 </tr>
             </ng-template>
         </p-table>
 
-        <p-dialog [(visible)]="productDialog" [style]="{ width: '550px' }" header="Detalles del Producto" [modal]="true" styleClass="p-fluid">
+        <p-dialog [(visible)]="productDialog" [style]="{ width: '550px' }" header="Detalles del Producto" [modal]="true"
+                  styleClass="p-fluid">
             <ng-template #content>
                 <div class="flex flex-col gap-6">
                     <div>
@@ -162,58 +167,68 @@ interface ExportColumn {
                     </div>
                     <div>
                         <label for="description" class="block font-bold mb-3">Descripción</label>
-                        <textarea id="description" pTextarea [(ngModel)]="product.description" required rows="3" cols="20" fluid></textarea>
+                        <textarea id="description" pTextarea [(ngModel)]="product.description" required rows="3"
+                                  cols="20" fluid></textarea>
                     </div>
 
                     <div>
                         <label for="category" class="block font-bold mb-3">Categoría</label>
-                        <p-dropdown id="category" [options]="categories()" [(ngModel)]="product.category_id" optionLabel="name" optionValue="id" placeholder="Seleccione una categoría" [filter]="true" filterBy="name" [showClear]="true" styleClass="w-full" [style]="{'width':'100%'}">
-                            <ng-template pTemplate="selectedItem">
-                                <div class="flex align-items-center gap-2" *ngIf="product.category_id">
-                                    <div>{{ getCategoryName(product.category_id) }}</div>
-                                </div>
-                            </ng-template>
-                            <ng-template let-category pTemplate="item">
-                                <div class="flex align-items-center gap-2">
-                                    <div>{{ category.name }}</div>
-                                </div>
-                            </ng-template>
+                        <p-dropdown
+                            id="category"
+                            [options]="categories()"
+                            [(ngModel)]="selectedCategoryId"
+                            optionLabel="name"
+                            optionValue="id"
+                            placeholder="Seleccione una categoría"
+                            [filter]="true"
+                            filterBy="name"
+                            [showClear]="true"
+                            styleClass="w-full"
+                            [style]="{'width':'100%'}"
+                            (onChange)="updateProductCategory()">
                         </p-dropdown>
-                        <small class="text-red-500" *ngIf="submitted && !product.category_id">Categoría requerida.</small>
+                        <small class="text-red-500" *ngIf="submitted && !selectedCategoryId">Categoría requerida.</small>
                     </div>
 
                     <div>
                         <label for="supplier" class="block font-bold mb-3">Proveedor</label>
-                        <p-dropdown id="supplier" [options]="suppliers()" [(ngModel)]="product.supplier_id" optionLabel="name" optionValue="id" placeholder="Seleccione un proveedor" [filter]="true" filterBy="name" [showClear]="true" styleClass="w-full" [style]="{'width':'100%'}">
-                            <ng-template pTemplate="selectedItem">
-                                <div class="flex align-items-center gap-2" *ngIf="product.supplier_id">
-                                    <div>{{ getSupplierName(product.supplier_id) }}</div>
-                                </div>
-                            </ng-template>
-                            <ng-template let-supplier pTemplate="item">
-                                <div class="flex align-items-center gap-2">
-                                    <div>{{ supplier.name }}</div>
-                                </div>
-                            </ng-template>
+                        <p-dropdown
+                            id="supplier"
+                            [options]="suppliers()"
+                            [(ngModel)]="selectedSupplierId"
+                            optionLabel="name"
+                            optionValue="id"
+                            placeholder="Seleccione un proveedor"
+                            [filter]="true"
+                            filterBy="name"
+                            [showClear]="true"
+                            styleClass="w-full"
+                            [style]="{'width':'100%'}"
+                            (onChange)="updateProductSupplier()">
                         </p-dropdown>
-                        <small class="text-red-500" *ngIf="submitted && !product.supplier_id">Proveedor requerido.</small>
+                        <small class="text-red-500" *ngIf="submitted && !selectedSupplierId">Proveedor requerido.</small>
                     </div>
 
                     <div>
                         <label for="quantity" class="block font-bold mb-3">Cantidad</label>
-                        <p-inputnumber id="quantity" [(ngModel)]="product.quantity" [showButtons]="true" buttonLayout="horizontal" spinnerMode="horizontal"
-                            decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" [min]="0" [step]="1" styleClass="w-full" />
+                        <p-inputnumber id="quantity" [(ngModel)]="product.quantity" [showButtons]="true"
+                                       buttonLayout="horizontal" spinnerMode="horizontal"
+                                       decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success"
+                                       incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" [min]="0"
+                                       [step]="1" styleClass="w-full" />
                         <small class="text-red-500" *ngIf="submitted && !product.quantity">Cantidad requerida.</small>
                     </div>
 
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-6">
                             <label for="totalPrice" class="block font-bold mb-3">Precio de costo</label>
-                            <p-inputnumber id="totalPrice" [(ngModel)]="product.cost_price" mode="currency" currency="EUR" locale="es-ES" [minFractionDigits]="2" styleClass="w-full" />
+                            <p-inputnumber id="totalPrice" [(ngModel)]="product.costPrice" mode="currency"
+                                           currency="EUR" locale="es-ES" [minFractionDigits]="2" styleClass="w-full" />
                         </div>
                         <div class="col-span-6">
                             <label for="retailPrice" class="block font-bold mb-3">Precio de Venta</label>
-                            <p-inputnumber id="retailPrice" [(ngModel)]="product.retail_price" mode="currency" currency="EUR" locale="es-ES" [minFractionDigits]="2" styleClass="w-full" />
+                            <p-inputnumber id="retailPrice" [(ngModel)]="product.retailPrice" mode="currency"
+                                           currency="EUR" locale="es-ES" [minFractionDigits]="2" styleClass="w-full" />
                         </div>
                     </div>
                 </div>
@@ -237,17 +252,17 @@ export class ProductCrud implements OnInit {
     suppliers = signal<Supplier[]>([]);
 
     product!: Product;
-
     selectedProducts!: Product[] | null;
 
-    submitted: boolean = false;
+    // Añadir estas propiedades
+    selectedCategoryId: number | null = null;
+    selectedSupplierId: number | null = null;
 
+    submitted: boolean = false;
     statuses!: any[];
 
     @ViewChild('dt') dt!: Table;
-
     exportColumns!: ExportColumn[];
-
     cols!: Column[];
 
     constructor(
@@ -269,7 +284,7 @@ export class ProductCrud implements OnInit {
     loadDemoData() {
         this.productService.getProducts().subscribe({
             next: (data) => {
-                console.log('Productos cargados:', data);
+                console.log('Productos cargados (estructura completa):', JSON.stringify(data[0]));
                 this.products.set(data);
             },
             error: (error) => {
@@ -288,7 +303,7 @@ export class ProductCrud implements OnInit {
         this.cols = [
             { field: 'code', header: 'Código', customExportHeader: 'Código de Producto' },
             { field: 'name', header: 'Nombre' },
-            { field: 'category_id', header: 'Categoría' },
+            { field: 'categoryId', header: 'Categoría' },
             { field: 'supplier_id', header: 'Proveedor' },
             { field: 'cost_price', header: 'Precio de Costo' },
             { field: 'retail_price', header: 'Precio de Venta' },
@@ -333,13 +348,13 @@ export class ProductCrud implements OnInit {
         this.product = {
             id: 0,
             code: "",
-            cost_price: 0,
             description: "",
             name: "",
             quantity: 0,
-            retail_price: 0,
-            category_id: 0,
-            supplier_id: 0
+            costPrice: 0,
+            retailPrice: 0,
+            category: undefined,
+            supplier: undefined
         };
         this.submitted = false;
         this.productDialog = true;
@@ -350,6 +365,9 @@ export class ProductCrud implements OnInit {
         this.loadCategoriesAndSuppliers();
 
         this.product = { ...product };
+        // Inicializar los IDs seleccionados
+        this.selectedCategoryId = product.category?.id || null;
+        this.selectedSupplierId = product.supplier?.id || null;
         this.productDialog = true;
     }
 
@@ -411,13 +429,13 @@ export class ProductCrud implements OnInit {
                 this.product = {
                     id: 0,
                     code: "",
-                    cost_price: 0,
                     description: "",
                     name: "",
                     quantity: 0,
-                    retail_price: 0,
-                    category_id: 0,
-                    supplier_id: 0
+                    costPrice: 0,
+                    retailPrice: 0,
+                    category: undefined,
+                    supplier: undefined
                 };
             }
         });
@@ -450,7 +468,11 @@ export class ProductCrud implements OnInit {
 
     saveProduct() {
         this.submitted = true;
-        let _products = this.products();
+
+        // Asegurarse de que la categoría y el proveedor estén actualizados
+        this.updateProductCategory();
+        this.updateProductSupplier();
+
         if (this.product.name?.trim()) {
             if (this.product.id) {
                 this.productService.updateProduct(this.product).subscribe((updatedProduct) => {
@@ -462,6 +484,7 @@ export class ProductCrud implements OnInit {
                         detail: 'Producto Actualizado',
                         life: 3000
                     });
+                    this.productDialog = false;
                 });
             } else {
                 this.productService.addProduct(this.product).subscribe((newProduct) => {
@@ -473,20 +496,38 @@ export class ProductCrud implements OnInit {
                         detail: 'Producto Creado',
                         life: 3000
                     });
+                    this.productDialog = false;
                 });
             }
-            this.productDialog = false;
-            this.product = {
-                id: 0,
-                code: "",
-                cost_price: 0,
-                description: "",
-                name: "",
-                quantity: 0,
-                retail_price: 0,
-                category_id: 0,
-                supplier_id: 0
-            };
+        }
+    }
+
+    updateProductCategory() {
+        if (this.selectedCategoryId) {
+            const category = this.categories().find(c => c.id === this.selectedCategoryId);
+            if (category) {
+                this.product.category = {
+                    id: category.id,
+                    name: category.name,
+                    description: category.description
+                };
+            }
+        } else {
+            this.product.category = undefined;
+        }
+    }
+
+    updateProductSupplier() {
+        if (this.selectedSupplierId) {
+            const supplier = this.suppliers().find(s => s.id === this.selectedSupplierId);
+            if (supplier) {
+                this.product.supplier = {
+                    id: supplier.id,
+                    name: supplier.name
+                };
+            }
+        } else {
+            this.product.supplier = undefined;
         }
     }
 }
