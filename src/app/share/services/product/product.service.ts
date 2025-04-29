@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { AuthService } from '../auth/auth.service';
 
 export interface Product {
   id: number;
@@ -29,7 +30,10 @@ export class ProductService {
   private baseUrl = 'http://localhost:8080/api';
   private apiUrl = `${this.baseUrl}/products`;
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) { }
 
   /**
    * Get all products
@@ -37,7 +41,20 @@ export class ProductService {
    */
   getProducts(): Observable<Product[]> {
     console.log('ProductService - Fetching all products');
-    return this.http.get<Product[]>(this.apiUrl).pipe(
+
+    // Check if user is authenticated
+    if (!this.authService.isAuthenticated()) {
+      console.error('ProductService - User is not authenticated');
+      return throwError(() => new Error('User is not authenticated'));
+    }
+
+    // Get the token and create headers
+    const token = this.authService.getToken();
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.get<Product[]>(this.apiUrl, { headers }).pipe(
       map(products => {
         console.log('ProductService - Successfully fetched products:', products.length);
         return products;
@@ -95,6 +112,8 @@ export class ProductService {
    */
   addProduct(product: Product): Observable<Product> {
     console.log('ProductService - Creating new product:', product);
+
+    // Simplificar la llamada HTTP como en CategoryService
     return this.http.post<Product>(this.apiUrl, product).pipe(
       map(newProduct => {
         console.log('ProductService - Successfully created product:', newProduct);
@@ -112,17 +131,9 @@ export class ProductService {
    * @param product Product to update
    * @returns Observable with the updated product or undefined
    */
-  updateProduct(product: Product): Observable<Product | undefined> {
-    console.log(`ProductService - Updating product with ID: ${product.id}`, product);
+  updateProduct(product: Product): Observable<Product> {
     return this.http.put<Product>(`${this.apiUrl}/${product.id}`, product).pipe(
-      map(updatedProduct => {
-        console.log(`ProductService - Successfully updated product with ID: ${product.id}`, updatedProduct);
-        return updatedProduct;
-      }),
-      catchError(error => {
-        console.error(`ProductService - Error updating product with ID ${product.id}:`, error);
-        return this.handleError(error);
-      })
+      catchError(error => this.handleError(error))
     );
   }
 
@@ -132,16 +143,8 @@ export class ProductService {
    * @returns Observable with boolean indicating success
    */
   deleteProduct(id: number): Observable<boolean> {
-    console.log(`ProductService - Deleting product with ID: ${id}`);
-    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
-      map(() => {
-        console.log(`ProductService - Successfully deleted product with ID: ${id}`);
-        return true;
-      }),
-      catchError(error => {
-        console.error(`ProductService - Error deleting product with ID ${id}:`, error);
-        return this.handleError(error);
-      })
+    return this.http.delete<boolean>(`${this.apiUrl}/${id}`).pipe(
+      catchError(error => this.handleError(error))
     );
   }
 

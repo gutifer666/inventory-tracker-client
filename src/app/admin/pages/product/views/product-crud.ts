@@ -474,29 +474,100 @@ export class ProductCrud implements OnInit {
         this.updateProductSupplier();
 
         if (this.product.name?.trim()) {
+            // Crear un objeto limpio para enviar al backend
+            const productToSave = {
+                id: this.product.id,
+                code: this.product.code.trim(),
+                name: this.product.name.trim(),
+                description: this.product.description?.trim() || '',
+                quantity: this.product.quantity,
+                costPrice: this.product.costPrice,
+                retailPrice: this.product.retailPrice,
+                category: this.product.category,
+                supplier: this.product.supplier
+            };
+
+            console.log('ProductCrud - Clean product object to save:', productToSave);
+
             if (this.product.id) {
-                this.productService.updateProduct(this.product).subscribe((updatedProduct) => {
-                    // Recargar todos los datos para asegurar que todo esté actualizado
-                    this.loadDemoData();
-                    this.messageService.add({
-                        severity: 'success',
-                        summary: 'Exitoso',
-                        detail: 'Producto Actualizado',
-                        life: 3000
-                    });
-                    this.productDialog = false;
+                this.productService.updateProduct(productToSave).subscribe({
+                    next: (updatedProduct) => {
+                        this.loadDemoData();
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Exitoso',
+                            detail: 'Producto Actualizado',
+                            life: 3000
+                        });
+                        this.productDialog = false;
+                        this.product = {
+                            id: 0,
+                            code: "",
+                            description: "",
+                            name: "",
+                            quantity: 0,
+                            costPrice: 0,
+                            retailPrice: 0,
+                            category: undefined,
+                            supplier: undefined
+                        };
+                    },
+                    error: (error) => {
+                        console.error('ProductCrud - Error updating product:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: error.message || 'Error al actualizar el producto',
+                            life: 5000
+                        });
+                    }
                 });
             } else {
-                this.productService.addProduct(this.product).subscribe((newProduct) => {
-                    // Recargar todos los datos para asegurar que todo esté actualizado
-                    this.loadDemoData();
-                    this.messageService.add({
-                        severity: 'success',
-                        summary: 'Exitoso',
-                        detail: 'Producto Creado',
-                        life: 3000
-                    });
-                    this.productDialog = false;
+                // Para nuevos productos, omitir el ID
+                const productToCreate = {
+                    code: this.product.code.trim(),
+                    name: this.product.name.trim(),
+                    description: this.product.description?.trim() || '',
+                    quantity: this.product.quantity,
+                    costPrice: this.product.costPrice,
+                    retailPrice: this.product.retailPrice,
+                    category: this.product.category,
+                    supplier: this.product.supplier
+                };
+
+                console.log('ProductCrud - Clean product object to create:', productToCreate);
+
+                this.productService.addProduct(productToCreate as Product).subscribe({
+                    next: (newProduct) => {
+                        this.loadDemoData();
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Exitoso',
+                            detail: 'Producto Creado',
+                            life: 3000
+                        });
+                        this.productDialog = false;
+                        this.product = {
+                            id: 0,
+                            code: "",
+                            description: "",
+                            name: "",
+                            quantity: 0,
+                            costPrice: 0,
+                            retailPrice: 0,
+                            category: undefined,
+                            supplier: undefined
+                        };
+                    },
+                    error: (error) => {
+                        console.error('ProductCrud - Error creating product:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: error.message || 'Error al crear el producto',
+                            life: 5000
+                        });
+                    }
                 });
             }
         }
@@ -506,11 +577,12 @@ export class ProductCrud implements OnInit {
         if (this.selectedCategoryId) {
             const category = this.categories().find(c => c.id === this.selectedCategoryId);
             if (category) {
+                // Simplificar la asignación de categoría
                 this.product.category = {
                     id: category.id,
-                    name: category.name,
-                    description: category.description
+                    name: category.name
                 };
+                console.log('ProductCrud - Updated category:', this.product.category);
             }
         } else {
             this.product.category = undefined;
@@ -521,10 +593,12 @@ export class ProductCrud implements OnInit {
         if (this.selectedSupplierId) {
             const supplier = this.suppliers().find(s => s.id === this.selectedSupplierId);
             if (supplier) {
+                // Simplificar la asignación de proveedor
                 this.product.supplier = {
                     id: supplier.id,
                     name: supplier.name
                 };
+                console.log('ProductCrud - Updated supplier:', this.product.supplier);
             }
         } else {
             this.product.supplier = undefined;

@@ -110,14 +110,14 @@ interface ExportColumn {
                     <div>
                         <label for="name" class="block font-bold mb-3">Nombre <span class="text-red-500">*</span></label>
                         <input type="text" pInputText id="name" [(ngModel)]="supplier.name" required autofocus fluid
-                               [ngClass]="{'ng-invalid ng-dirty': submitted && !supplier.name?.trim()}" />
-                        <small class="p-error" *ngIf="submitted && !supplier.name?.trim()">El nombre es requerido.</small>
+                               [ngClass]="{'ng-invalid ng-dirty': submitted && !supplier.name.trim()}" />
+                        <small class="p-error" *ngIf="submitted && !supplier.name.trim()">El nombre es requerido.</small>
                     </div>
                 </div>
             </ng-template>
             <ng-template #footer>
                 <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
-                <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text" [disabled]="submitted && !supplier.name?.trim()" (click)="saveSupplier()"></button>
+                <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text" [disabled]="submitted && !supplier.name.trim()" (click)="saveSupplier()"></button>
             </ng-template>
         </p-dialog>
 
