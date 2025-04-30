@@ -414,18 +414,36 @@ export class ProductCrud implements OnInit {
             header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.productService.deleteProduct(product.id).subscribe((success) => {
-                    if (success) {
-                        // Recargar todos los datos para asegurar que todo esté actualizado
-                        this.loadDemoData();
+                this.productService.deleteProduct(product.id).subscribe({
+                    next: (success) => {
+                        if (success) {
+                            // Forzar recarga completa de datos en lugar de intentar actualizar localmente
+                            console.log(`ProductCrud - Product ${product.id} deleted successfully, reloading data...`);
+
+                            // Pequeña pausa para asegurar que el backend ha completado la operación
+                            setTimeout(() => {
+                                this.loadDemoData();
+
+                                this.messageService.add({
+                                    severity: 'success',
+                                    summary: 'Exitoso',
+                                    detail: 'Producto Eliminado',
+                                    life: 3000
+                                });
+                            }, 300);
+                        }
+                    },
+                    error: (error) => {
+                        console.error('ProductCrud - Error deleting product:', error);
                         this.messageService.add({
-                            severity: 'success',
-                            summary: 'Exitoso',
-                            detail: 'Producto Eliminado',
-                            life: 3000
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: error.message || 'Error al eliminar el producto',
+                            life: 5000
                         });
                     }
                 });
+
                 this.product = {
                     id: 0,
                     code: "",

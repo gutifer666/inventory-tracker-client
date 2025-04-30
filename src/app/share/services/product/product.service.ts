@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { AuthService } from '../auth/auth.service';
 
@@ -143,8 +143,28 @@ export class ProductService {
    * @returns Observable with boolean indicating success
    */
   deleteProduct(id: number): Observable<boolean> {
+    console.log(`ProductService - Deleting product with ID: ${id}`);
+
     return this.http.delete<boolean>(`${this.apiUrl}/${id}`).pipe(
-      catchError(error => this.handleError(error))
+      map(response => {
+        console.log(`ProductService - Successfully deleted product with ID: ${id}`);
+        return true;
+      }),
+      catchError(error => {
+        console.error(`ProductService - Error deleting product with ID ${id}:`, error);
+
+        // Si el error es 500 pero contiene mensaje de que se eliminó correctamente,
+        // consideramos que la operación fue exitosa
+        if (error.status === 500 &&
+            error.error &&
+            (error.error.message?.includes('deleted successfully') ||
+             error.message?.includes('deleted successfully'))) {
+          console.warn(`ProductService - Backend returned error 500 but product appears to be deleted. Treating as success.`);
+          return of(true);
+        }
+
+        return this.handleError(error);
+      })
     );
   }
 
