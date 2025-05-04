@@ -158,4 +158,12 @@ export class AuthService {
     const user = this.currentUserValue;
     return user ? user.role : null;
   }
+
+  /**
+   * Actualiza el usuario actual en el BehaviorSubject
+   * @param user Datos actualizados del usuario
+   */
+  updateCurrentUser(user: CurrentUser): void {
+    this.currentUserSubject.next(user);
+  }
 }

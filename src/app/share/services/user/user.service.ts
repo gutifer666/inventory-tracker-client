@@ -153,6 +153,46 @@ export class UserService {
   }
 
   /**
+   * Get the current authenticated user
+   * @returns Observable with the current user
+   */
+  getCurrentUser(): Observable<User | undefined> {
+    console.log('UserService - Fetching current user');
+    return this.http.get<User>(`${this.apiUrl}/current`).pipe(
+      map(user => {
+        console.log('UserService - Successfully fetched current user:', user);
+        return user;
+      }),
+      catchError(error => {
+        console.error('UserService - Error fetching current user:', error);
+        return this.handleError(error);
+      })
+    );
+  }
+
+  /**
+   * Get a user by username
+   * @param username Username to search for
+   * @returns Observable with the user or undefined
+   */
+  getUserByUsername(username: string): Observable<User | undefined> {
+    console.log(`UserService - Fetching user with username: ${username}`);
+    return this.http.get<User[]>(`${this.apiUrl}?username=${username}`).pipe(
+      map(users => {
+        if (users && users.length > 0) {
+          console.log('UserService - Successfully fetched user by username:', users[0]);
+          return users[0];
+        }
+        return undefined;
+      }),
+      catchError(error => {
+        console.error(`UserService - Error fetching user with username ${username}:`, error);
+        return this.handleError(error);
+      })
+    );
+  }
+
+  /**
    * Handle HTTP errors
    * @param error The HTTP error response
    * @returns An observable with the error message

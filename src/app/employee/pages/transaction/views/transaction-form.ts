@@ -16,12 +16,13 @@ import { TransactionService } from '../../../../share/services/transaction/trans
 import { TransactionDTO } from '../../../../share/interfaces/transaction.interface';
 import { LoginService } from '../../../../share/services/login/login.service';
 import { AuthService } from '../../../../share/services/auth/auth.service';
+import { UserService } from '../../../../share/services/user/user.service';
 
 @Component({
     selector: 'app-transaction-form',
     standalone: true,
     imports: [CommonModule, InputTextModule, FluidModule, ButtonModule, FormsModule, TextareaModule, AutoCompleteModule, ProgressSpinnerModule, ToastModule],
-    providers: [MessageService, ProductService, TransactionService, LoginService, AuthService],
+    providers: [MessageService, ProductService, TransactionService, LoginService, AuthService, UserService],
     template: `<p-fluid>
         <div class="flex mt-8">
             <div class="card flex flex-col gap-6 w-full">
@@ -109,6 +110,7 @@ export class TransactionForm implements OnInit {
         private transactionService: TransactionService,
         private loginService: LoginService,
         private authService: AuthService,
+        private userService: UserService,
         private messageService: MessageService
     ) {}
 
@@ -180,26 +182,58 @@ export class TransactionForm implements OnInit {
         const currentUser = this.loginService.getCurrentUser();
         console.log('Current user from login service:', currentUser);
 
-        if (currentUser && currentUser.id) {
+        if (currentUser && currentUser.id > 0) {
             this.userId = currentUser.id;
-            console.log('User ID set to:', this.userId);
+            console.log('User ID set from login service to:', this.userId);
             return;
         }
 
-        // If not found, try from AuthService
-        console.log('Trying to get user from AuthService...');
+        // Try to get user from AuthService
         const authUser = this.authService.currentUserValue;
         console.log('Current user from auth service:', authUser);
 
-        if (authUser && authUser.id) {
-            this.userId = authUser.id;
-            console.log('User ID set from AuthService to:', this.userId);
-            return;
-        }
+        if (authUser && authUser.username) {
+            // We have a user from AuthService but need to find their ID
+            console.log('Getting all users to find match for username:', authUser.username);
+            this.userService.getUsers().subscribe({
+                next: (users) => {
+                    const matchedUser = users.find(u => u.username === authUser.username);
+                    if (matchedUser) {
+                        this.userId = matchedUser.id;
+                        console.log('User ID set from username match to:', this.userId);
 
-        // If still not found, set a default ID for testing (remove in production)
+                        // Update the stored user with the correct ID
+                        const updatedUser = {
+                            ...authUser,
+                            id: matchedUser.id,
+                            fullName: matchedUser.fullName
+                        };
+                        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+
+                        // If AuthService has an updateCurrentUser method, use it
+                        if (typeof this.authService.updateCurrentUser === 'function') {
+                            this.authService.updateCurrentUser(updatedUser);
+                        }
+                    } else {
+                        this.setDefaultUserId();
+                    }
+                },
+                error: (error) => {
+                    console.error('Error getting users:', error);
+                    this.setDefaultUserId();
+                }
+            });
+        } else {
+            this.setDefaultUserId();
+        }
+    }
+
+    /**
+     * Set a default user ID for testing
+     */
+    private setDefaultUserId() {
         console.log('No user found in any service, setting default ID for testing');
-        this.userId = 1; // Default ID for testing
+        this.userId = 2; // Default ID for testing - using employee ID from logs
         console.log('User ID set to default:', this.userId);
 
         // Show error message
