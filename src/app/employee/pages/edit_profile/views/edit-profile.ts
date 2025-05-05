@@ -234,7 +234,7 @@ export class EditProfile implements OnInit {
         const updatedUser: User = {
             ...this.currentUser,
             fullName: this.fullName,
-            password: this.password || this.currentUser.password // Use existing password if no new one provided
+            password: this.password ? this.password : 'pass' // Si no hay nueva contraseña, enviar 'pass'
         };
 
         this.userService.updateUser(updatedUser).subscribe({
