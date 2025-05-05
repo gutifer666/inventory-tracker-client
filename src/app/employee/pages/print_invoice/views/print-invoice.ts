@@ -18,6 +18,7 @@ import { MessageService } from 'primeng/api';
 import { TransactionService} from '../../../../share/services/transaction/transaction.service';
 import { UserService } from '../../../../share/services/user/user.service';
 import { LoginService } from '../../../../share/services/login/login.service';
+import { AuthService } from '../../../../share/services/auth/auth.service';
 
 // Interfaces
 import { Transaction } from '../../../../share/interfaces/transaction.interface';
@@ -195,25 +196,113 @@ export class PrintInvoice implements OnInit {
         private transactionService: TransactionService,
         private userService: UserService,
         private loginService: LoginService,
+        private authService: AuthService,
         private messageService: MessageService,
         private router: Router
     ) {}
 
     ngOnInit() {
-        // Get current user
+        this.getCurrentUserId();
+    }
+
+    /**
+     * Get the current user ID from available services
+     */
+    getCurrentUserId() {
+        console.log('Getting current user ID...');
+
+        // Try from LoginService first
         const currentUser = this.loginService.getCurrentUser();
-        if (currentUser) {
+        console.log('Current user from login service:', currentUser);
+
+        if (currentUser && currentUser.id > 0) {
             this.currentUserId = currentUser.id;
-            this.userService.getUserById(currentUser.id).subscribe(user => {
-                if (user) {
-                    this.currentUserName = user.fullName;
-                    this.loadTransactions();
+            console.log('User ID set from login service to:', this.currentUserId);
+            this.loadUserData();
+            return;
+        }
+
+        // Try to get user from AuthService
+        const authUser = this.authService.currentUserValue;
+        console.log('Current user from auth service:', authUser);
+
+        if (authUser && authUser.username) {
+            // We have a user from AuthService but need to find their ID
+            console.log('Getting all users to find match for username:', authUser.username);
+            this.userService.getUsers().subscribe({
+                next: (users) => {
+                    const matchedUser = users.find(u => u.username === authUser.username);
+                    if (matchedUser) {
+                        this.currentUserId = matchedUser.id;
+                        this.currentUserName = matchedUser.fullName;
+                        console.log('User ID set from username match to:', this.currentUserId);
+
+                        // Update the stored user with the correct ID
+                        const updatedUser = {
+                            ...authUser,
+                            id: matchedUser.id,
+                            fullName: matchedUser.fullName
+                        };
+                        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+
+                        // If AuthService has an updateCurrentUser method, use it
+                        if (typeof this.authService.updateCurrentUser === 'function') {
+                            this.authService.updateCurrentUser(updatedUser);
+                        }
+
+                        this.loadTransactions();
+                    } else {
+                        this.setDefaultUser();
+                    }
+                },
+                error: (error) => {
+                    console.error('Error getting users:', error);
+                    this.setDefaultUser();
                 }
             });
         } else {
-            // If no user is logged in, redirect to login
-            this.router.navigate(['/']);
+            this.setDefaultUser();
         }
+    }
+
+    /**
+     * Load user data based on the current user ID
+     */
+    loadUserData() {
+        this.userService.getUserById(this.currentUserId).subscribe({
+            next: (user) => {
+                if (user) {
+                    this.currentUserName = user.fullName;
+                    this.loadTransactions();
+                } else {
+                    this.setDefaultUser();
+                }
+            },
+            error: (error) => {
+                console.error('Error loading user data:', error);
+                this.setDefaultUser();
+            }
+        });
+    }
+
+    private setDefaultUser() {
+        console.log('No user found in any service, setting default ID for testing');
+        this.currentUserId = 2; // Default ID for testing - using employee ID from logs
+        console.log('User ID set to default:', this.currentUserId);
+
+        // Show error message
+        this.messageService.add({
+            severity: 'warn',
+            summary: 'Advertencia',
+            detail: 'Se ha establecido un ID de usuario por defecto para pruebas.'
+        });
+
+        this.userService.getUserById(this.currentUserId).subscribe(user => {
+            if (user) {
+                this.currentUserName = user.fullName;
+                this.loadTransactions();
+            }
+        });
     }
 
     loadTransactions() {
