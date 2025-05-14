@@ -1,5 +1,5 @@
 {
-    "name": "inventory-tracker-client",
+    "name": "sakai-ng",
     "version": "19.0.1",
     "scripts": {
         "ng": "ng",
