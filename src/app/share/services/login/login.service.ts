@@ -32,7 +32,7 @@ export interface AuthResponse {
 export class LoginService {
   private currentUser: CurrentUser | null = null;
 
-  private apiUrl = 'http://localhost:8080/api';
+  private apiUrl = 'https://api-inventory-tracker-production.up.railway.app/api';
 
   constructor(private http: HttpClient) {
     // Intentar recuperar el usuario del localStorage al iniciar

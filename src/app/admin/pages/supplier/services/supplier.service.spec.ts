@@ -41,7 +41,7 @@ describe('SupplierService', () => {
       expect(suppliers).toEqual(mockSuppliers);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/suppliers');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/suppliers');
     expect(req.request.method).toBe('GET');
     req.flush(mockSuppliers);
   });
@@ -56,7 +56,7 @@ describe('SupplierService', () => {
       expect(supplier).toEqual(mockSupplier);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/suppliers/1');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/suppliers/1');
     expect(req.request.method).toBe('GET');
     req.flush(mockSupplier);
   });
@@ -76,7 +76,7 @@ describe('SupplierService', () => {
       expect(supplier).toEqual(createdSupplier);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/suppliers');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/suppliers');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(newSupplier);
     req.flush(createdSupplier);
@@ -92,7 +92,7 @@ describe('SupplierService', () => {
       expect(updatedSupplier).toEqual(supplier);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/suppliers/1');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/suppliers/1');
     expect(req.request.method).toBe('PUT');
     expect(req.request.body).toEqual(supplier);
     req.flush(supplier);
@@ -103,7 +103,7 @@ describe('SupplierService', () => {
       expect(result).toBe(true);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/suppliers/1');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/suppliers/1');
     expect(req.request.method).toBe('DELETE');
     req.flush(null, { status: 204, statusText: 'No Content' });
   });
@@ -116,7 +116,7 @@ describe('SupplierService', () => {
       }
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/suppliers');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/suppliers');
     req.flush('Not Found', { status: 404, statusText: 'Not Found' });
   });
 });

@@ -53,7 +53,7 @@ describe('UserService', () => {
       expect(users).toEqual(mockUsers);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/users');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/users');
     expect(req.request.method).toBe('GET');
     req.flush(mockUsers);
   });
@@ -73,7 +73,7 @@ describe('UserService', () => {
       expect(user).toEqual(mockUser);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/users/1');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/users/1');
     expect(req.request.method).toBe('GET');
     req.flush(mockUser);
   });
@@ -98,7 +98,7 @@ describe('UserService', () => {
       expect(user).toEqual(mockResponse);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/users');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/users');
     expect(req.request.method).toBe('POST');
 
     // Check that the password is hashed with BCrypt
@@ -131,7 +131,7 @@ describe('UserService', () => {
       expect(user).toEqual(userToUpdate);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/users/1');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/users/1');
     expect(req.request.method).toBe('PUT');
 
     // Check that the password is hashed with BCrypt
@@ -155,7 +155,7 @@ describe('UserService', () => {
       expect(result).toBe(true);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/users/1');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/users/1');
     expect(req.request.method).toBe('DELETE');
     req.flush(null, { status: 204, statusText: 'No Content' });
   });
@@ -168,7 +168,7 @@ describe('UserService', () => {
       }
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/users');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/users');
     req.flush('Not Found', { status: 404, statusText: 'Not Found' });
   });
 });

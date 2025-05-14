@@ -31,7 +31,7 @@ export class AuthService {
   private currentUserSubject: BehaviorSubject<CurrentUser | null>;
   public currentUser: Observable<CurrentUser | null>;
 
-  private apiUrl = 'http://localhost:8080/api';
+  private apiUrl = 'https://api-inventory-tracker-production.up.railway.app/api';
   private tokenKey = 'jwt_token';
   private userKey = 'current_user';
 

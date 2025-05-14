@@ -12,7 +12,7 @@ export interface Supplier {
   providedIn: 'root'
 })
 export class SupplierService {
-  private baseUrl = 'http://localhost:8080/api';
+  private baseUrl = 'https://api-inventory-tracker-production.up.railway.app/api';
   private apiUrl = `${this.baseUrl}/suppliers`;
 
   constructor(private http: HttpClient) { }

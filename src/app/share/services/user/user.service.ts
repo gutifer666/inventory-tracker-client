@@ -9,7 +9,7 @@ import * as bcrypt from 'bcryptjs';
   providedIn: 'root'
 })
 export class UserService {
-  private baseUrl = 'http://localhost:8080/api';
+  private baseUrl = 'https://api-inventory-tracker-production.up.railway.app/api';
   private apiUrl = `${this.baseUrl}/users`;
 
   constructor(private http: HttpClient) { }

@@ -27,7 +27,7 @@ export interface Product {
   providedIn: 'root'
 })
 export class ProductService {
-  private baseUrl = 'http://localhost:8080/api';
+  private baseUrl = 'https://api-inventory-tracker-production.up.railway.app/api';
   private apiUrl = `${this.baseUrl}/products`;
 
   constructor(

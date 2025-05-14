@@ -43,7 +43,7 @@ describe('CategoryService', () => {
       expect(categories).toEqual(mockCategories);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/categories');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/categories');
     expect(req.request.method).toBe('GET');
     req.flush(mockCategories);
   });
@@ -59,7 +59,7 @@ describe('CategoryService', () => {
       expect(category).toEqual(mockCategory);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/categories/1');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/categories/1');
     expect(req.request.method).toBe('GET');
     req.flush(mockCategory);
   });
@@ -80,7 +80,7 @@ describe('CategoryService', () => {
       expect(category).toEqual(createdCategory);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/categories');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/categories');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(newCategory);
     req.flush(createdCategory);
@@ -97,7 +97,7 @@ describe('CategoryService', () => {
       expect(updatedCategory).toEqual(category);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/categories/1');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/categories/1');
     expect(req.request.method).toBe('PUT');
     expect(req.request.body).toEqual(category);
     req.flush(category);
@@ -108,7 +108,7 @@ describe('CategoryService', () => {
       expect(result).toBe(true);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/categories/1');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/categories/1');
     expect(req.request.method).toBe('DELETE');
     req.flush(null, { status: 204, statusText: 'No Content' });
   });
@@ -121,7 +121,7 @@ describe('CategoryService', () => {
       }
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/categories');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/categories');
     req.flush('Not Found', { status: 404, statusText: 'Not Found' });
   });
 });

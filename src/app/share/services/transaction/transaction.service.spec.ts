@@ -42,7 +42,7 @@ describe('TransactionService', () => {
       expect(transactions).toEqual(mockTransactions);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/transactions');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/transactions');
     expect(req.request.method).toBe('GET');
     req.flush(mockTransactions);
   });
@@ -70,7 +70,7 @@ describe('TransactionService', () => {
       expect(transaction).toEqual(mockResponse);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/transactions');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/transactions');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(mockTransactionDTO);
     req.flush(mockResponse);

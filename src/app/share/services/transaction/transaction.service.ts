@@ -8,7 +8,7 @@ import { Transaction, TransactionDTO } from '../../interfaces/transaction.interf
     providedIn: 'root'
 })
 export class TransactionService {
-    private baseUrl = 'http://localhost:8080/api';
+    private baseUrl = 'https://api-inventory-tracker-production.up.railway.app/api';
     private apiUrl = `${this.baseUrl}/transactions`;
 
     constructor(private http: HttpClient) {}

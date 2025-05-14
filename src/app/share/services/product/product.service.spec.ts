@@ -55,7 +55,7 @@ describe('ProductService', () => {
       expect(products).toEqual(mockProducts);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/products');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/products');
     expect(req.request.method).toBe('GET');
     req.flush(mockProducts);
   });
@@ -77,7 +77,7 @@ describe('ProductService', () => {
       expect(product).toEqual(mockProduct);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/products/1');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/products/1');
     expect(req.request.method).toBe('GET');
     req.flush(mockProduct);
   });
@@ -102,7 +102,7 @@ describe('ProductService', () => {
       expect(products).toEqual(mockProducts);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/products?category_id=1');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/products?category_id=1');
     expect(req.request.method).toBe('GET');
     req.flush(mockProducts);
   });
@@ -129,7 +129,7 @@ describe('ProductService', () => {
       expect(product).toEqual(createdProduct);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/products');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/products');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(newProduct);
     req.flush(createdProduct);
@@ -152,7 +152,7 @@ describe('ProductService', () => {
       expect(updatedProduct).toEqual(product);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/products/1');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/products/1');
     expect(req.request.method).toBe('PUT');
     expect(req.request.body).toEqual(product);
     req.flush(product);
@@ -163,7 +163,7 @@ describe('ProductService', () => {
       expect(result).toBe(true);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/products/1');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/products/1');
     expect(req.request.method).toBe('DELETE');
     req.flush(null, { status: 204, statusText: 'No Content' });
   });
@@ -176,7 +176,7 @@ describe('ProductService', () => {
       }
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/products');
+    const req = httpMock.expectOne('https://api-inventory-tracker-production.up.railway.app/api/products');
     req.flush('Not Found', { status: 404, statusText: 'Not Found' });
   });
 });
